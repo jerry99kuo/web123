@@ -3,95 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jerry Kuo - Home</title>
+    <title>郭兆軒 Jerry Kuo - 個人網站</title>
+    <meta name="description" content="歡迎來到郭兆軒 (Jerry Kuo) 的個人網站，這裡展示我的作品、聯絡方式與更多資訊。">
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
+        /* 全局樣式 */
         body {
-            padding: 20px;
+            margin: 0;
+            padding: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa, #c3cfe2); /* 漸層背景 */
+            background: linear-gradient(135deg, #144ff0, #19cc55);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
+            animation: fadeIn 1.2s ease;
         }
 
+        /* 容器樣式 */
         .container {
-            background-color: rgba(255, 255, 255, 0.9);
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            background-color: rgba(255, 255, 255, 0.92);
+            padding: 50px 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+            text-align: center;
+            max-width: 450px;
         }
 
+        /* 頭像 */
+        .profile-img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .profile-img:hover {
+            transform: scale(1.05);
+        }
+
+        /* 標題與文字 */
         h1 {
             font-weight: 700;
+            color: #222;
             margin-bottom: 10px;
-            color: #333;
         }
 
         p {
-            font-size: 1.2rem;
-            margin-bottom: 30px;
             color: #555;
+            font-size: 1.1rem;
+            margin-bottom: 35px;
         }
 
-        /* 自訂按鈕樣式 */
+        /* 按鈕區 */
         .custom-btn {
-            padding: 15px;
+            padding: 14px;
             font-size: 1.1rem;
             font-weight: 600;
-            border-radius: 50px;
+            border-radius: 40px;
             transition: all 0.3s ease;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border: none;
         }
 
-        /* 漸層按鈕 */
         .btn-primary.custom-btn {
             background: linear-gradient(45deg, #1e3c72, #2a5298);
-            border: none;
             color: #fff;
-        }
-
-        .btn-primary.custom-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
         }
 
         .btn-success.custom-btn {
             background: linear-gradient(45deg, #00b09b, #96c93d);
-            border: none;
             color: #fff;
         }
 
-        .btn-success.custom-btn:hover {
+        .custom-btn:hover {
             transform: translateY(-3px);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.25);
         }
 
-        /* 手機版調整按鈕寬度 */
-        @media (max-width: 600px) {
-            .d-grid.col-6 {
-                width: 100%;
+        .btn-container a {
+            width: 100%;
+        }
+
+        /* 響應式調整 */
+        @media (max-width: 576px) {
+            .container {
+                padding: 40px 25px;
+                border-radius: 15px;
             }
+        }
+
+        /* 淡入動畫 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
+
 <body>
-    <div class="container text-center">
-        <img src="/static/images/me.jpg" alt="Jerry Kuo" class="rounded-circle mb-4" style="width:150px; height:150px; object-fit:cover; box-shadow:0 4px 12px rgba(0,0,0,0.2);">
+    <main class="container">
+        <img src="/static/images/me.jpg" alt="Jerry Kuo" class="profile-img">
 
-        <h1>Hi, I'm Jerry Kuo</h1>
-        <p>歡迎來到我的個人網站！探索我的作品和聯絡我吧。</p>
+        <h1>郭兆軒的網站</h1>
+        <p>歡迎來到我的個人網站！這裡展示我的作品與聯絡方式。</p>
 
-        <!-- 按鈕 -->
-        <div class="d-grid gap-3 col-6 mx-auto">
-            <a href="/portfolio" class="btn btn-primary btn-lg w-100 custom-btn">我的作品</a>
-            <a href="/contact" class="btn btn-success btn-lg w-100 custom-btn">聯絡我</a>
+        <div class="d-grid gap-3 btn-container">
+            <a href="/portfolio" class="btn btn-primary custom-btn">我的作品</a>
+            <a href="/contact" class="btn btn-success custom-btn">聯絡我</a>
+            <a href="/link" class="btn btn-danger custom-btn">Blog / 連結</a>
         </div>
-    </div>
+  
+    </main>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
