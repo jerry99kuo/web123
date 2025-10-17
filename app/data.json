@@ -1,0 +1,24 @@
+{
+    "home": {
+        "title": "Hi123",
+        "subtitle": "歡迎來到我的個人網站！探索我的作品和聯絡我吧。"
+    },
+    "portfolio": [
+        {
+            "name": "Project 1",
+            "link": "https://example.com/project1"
+        },
+        {
+            "name": "Project 2",
+            "link": "https://example.com/project2"
+        }
+    ],
+    "contact": {
+        "email": "jerrykuo@gmail.com",
+        "phone": "123-456-7890"
+    },
+    "links": {
+        "link1": "https://google.com",
+        "link2": "https://yahoo.com"
+    }
+}
