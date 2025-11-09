@@ -1,7 +1,7 @@
 {
     "home": {
-        "title": "Hi123",
-        "subtitle": "歡迎來到我的個人網站！探索我的作品和聯絡我吧。"
+        "title": "Hi",
+        "subtitle": "歡迎來到我的個人網站"
     },
     "portfolio": [
         {
@@ -17,8 +17,38 @@
         "email": "jerrykuo@gmail.com",
         "phone": "123-456-7890"
     },
-    "links": {
-        "link1": "https://google.com",
-        "link2": "https://yahoo.com"
-    }
+    "links": [
+        {
+            "name": "Google",
+            "url": "https://google.com"
+        },
+        {
+            "name": "Yahoo",
+            "url": "https://yahoo.com"
+        }
+    ],
+    "articles": [
+        {
+            "id": 1,
+            "title": "深入淺出：Python Asyncio 異步編程入門",
+            "summary": "了解 Python 中異步 (Asynchronous) 編程的原理、如何使用 asyncio 模組，以及如何透過非阻塞 IO 提升應用程式的效能。",
+            "chapters": [
+                {
+                    "chapter_id": 1,
+                    "chapter_title": "第一集：阻塞與非阻塞的世界",
+                    "content": "傳統的同步編程會讓程式在等待 IO 操作（如網路請求或檔案讀寫）時完全停止（阻塞）。\r\n\r\n異步編程（Asynchronous Programming）的目標是允許程式在等待 IO 完成的同時，可以切換去做其他有意義的工作（非阻塞）。這對於需要處理大量併發連接的網路應用程式（如 FastAPI 伺服器）至關重要。\r\n\r\n核心概念：\r\nIO Bound (I/O 密集型): 程式大部分時間都在等待外部操作。異步編程對此類任務最有幫助。\r\n\r\nCPU Bound (CPU 密集型): 程式大部分時間都在執行計算。這類任務應使用多進程 (Multiprocessing)。"
+                },
+                {
+                    "chapter_id": 2,
+                    "chapter_title": "第二集：Async/Await 與 Event Loop",
+                    "content": "在 Python 中，我們主要使用 async 和 await 關鍵字來定義和呼叫協程（Coroutines）。\r\n\r\n協程是異步編程的基本單元，它可以在執行過程中暫停並讓出控制權。\r\n\r\nPython\r\n\r\nimport asyncio\r\n\r\nasync def say_hello(delay, what):\r\n    await asyncio.sleep(delay) # 暫停並讓出控制權\r\n    print(what)\r\n\r\nasync def main():\r\n    # 同時啟動多個協程\r\n    await asyncio.gather(\r\n        say_hello(3, \"Hello after 3s\"),\r\n        say_hello(1, \"World after 1s\")\r\n    )\r\n\r\n# 啟動 Event Loop\r\nasyncio.run(main())\r\n**Event Loop（事件循環）**是 asyncio 的核心，它負責監控所有正在等待的協程，並在 IO 準備就緒時，將控制權交還給對應的協程。"
+                },
+                {
+                    "chapter_id": 3,
+                    "chapter_title": "第三集：Asyncio 實際應用：HTTP 請求",
+                    "content": "要讓異步編程發揮作用，我們必須使用異步版本的函式庫。例如，進行 HTTP 請求時，我們不應使用同步的 requests 函式庫，而應該使用異步的 httpx 或 aiohttp。\r\n\r\n以下是使用 httpx 異步發送請求的簡單範例：\r\n\r\nPython\r\n\r\nimport httpx\r\nimport asyncio\r\n\r\nasync def fetch_url(url):\r\n    async with httpx.AsyncClient() as client:\r\n        response = await client.get(url)\r\n        print(f\"Fetched {url}: {len(response.text)} bytes\")\r\n\r\nasync def run_multiple_fetches():\r\n    urls = [\"https://example.com\", \"https://google.com\"]\r\n    tasks = [fetch_url(url) for url in urls]\r\n    # 同時等待所有請求完成\r\n    await asyncio.gather(*tasks)\r\n\r\nif __name__ == '__main__':\r\n    asyncio.run(run_multiple_fetches())\r\n這種方式能極大地提高併發處理網路請求的效率。"
+                }
+            ]
+        }
+    ]
 }

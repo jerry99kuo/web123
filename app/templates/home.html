@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>郭兆軒 Jerry Kuo - 個人網站</title>
-    <meta name="description" content="歡迎來到郭兆軒 (Jerry Kuo) 的個人網站，這裡展示我的作品、聯絡方式與更多資訊。">
+    <title>郭兆軒的個人網站</title>
+    <meta name="description" content="歡迎來到郭兆軒的個人網站，這裡展示我的作品、聯絡方式與更多資訊。">
 
+    <link rel="icon" href="static/images/jk.jpg" type="image/x-icon">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
@@ -13,204 +14,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
-    <style>
-        /* --- 1. 全局與變數設定 --- */
-        :root {
-            --primary-color: #0d6cf0ff;
-            --secondary-color: #3a6073;
-            --accent-color: #1a2a6c;
-            --text-dark: #2c3e50;
-            --text-light: #5a6a7a;
-            --bg-light: #f8f9fa;
-            --font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+    <link rel="stylesheet" href="static/style/home.css">
 
-        html {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: var(--font-family);
-            background: linear-gradient(135deg, #4ac7ddff, #22bed3ff); /* 更改為更柔和的漸層 */
-            color: var(--text-dark);
-            overflow-x: hidden; /* 防止水平滾動 */
-        }
-
-        /* --- 2. 首頁 Hero Section --- */
-        .hero {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 40px 20px;
-            color: white;
-            position: relative;
-        }
-        
-        /* 玻璃擬態卡片 */
-        .container-box {
-            background-color: rgba(8, 3, 17, 0.16); /* 調低透明度 */
-            backdrop-filter: blur(15px); /* 核心：模糊背景 */
-            -webkit-backdrop-filter: blur(15px);
-            padding: 50px 40px;
-            border-radius: 25px;
-            box-shadow: 0 12px 30px rgba(0,0,0,0.2);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            text-align: center;
-            max-width: 750px;
-            width: 90%; 
-            margin: 0 auto; /* 保證置中 */
-            animation: fadeIn 1.2s ease-out;
-        }
-
-        /* 頭像 */
-        .profile-img {
-            width: 140px;
-            height: 140px;
-            object-fit: cover;
-            object-position: center 30%;
-            border-radius: 50%;
-            border: 4px solid rgba(255, 255, 255, 0.7);
-            box-shadow: 0 5px 20px rgba(0,0,0,0.25);
-            margin-bottom: 25px;
-            transition: transform 0.4s ease, box-shadow 0.4s ease;
-        }
-
-        .profile-img:hover {
-            transform: scale(1.08) rotate(3deg);
-            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-        }
-
-        /* 標題與文字 */
-        h1 {
-            font-weight: 700;
-            color: var(--text-dark);
-            margin-bottom: 12px;
-            font-size: 2.2rem;
-        }
-
-        .hero p {
-            color: #333;
-            font-size: 1.1rem;
-            margin-bottom: 40px;
-            font-weight: 400;
-        }
-
-        /* 按鈕區 */
-        .custom-btn {
-            padding: 14px 20px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            border-radius: 50px; /* 改為全圓角 */
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            border: none;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px; /* 圖示與文字間距 */
-        }
-        
-        /* 調整按鈕顏色 */
-        .btn-custom-1 { background-color: var(--primary-color); color: #fff; }
-        .btn-custom-2 { background-color: var(--secondary-color); color: #fff; }
-        .btn-custom-3 { background-color: var(--accent-color); color: #fff; }
-
-        .custom-btn:hover {
-            transform: translateY(-4px) scale(1.02);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-        }
-        
-        /* 往下滾動箭頭 */
-        .scroll-down {
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 2.5rem;
-            animation: bounce 2s infinite;
-        }
-
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translate(-50%, 0); }
-            40% { transform: translate(-50%, -20px); }
-            60% { transform: translate(-50%, -10px); }
-        }
-
-        /* --- 3. 文章區塊 --- */
-        #articles {
-            background-color: var(--bg-light);
-            padding: 100px 20px;
-        }
-
-        #articles h2 {
-            font-weight: 700;
-            margin-bottom: 50px;
-            text-align: center;
-            font-size: 2.5rem;
-            color: var(--text-dark);
-        }
-
-        .article {
-            max-width: 750px;
-            margin: 0 auto 40px auto;
-            background: #fff;
-            border-radius: 16px;
-            padding: 35px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-            text-align: left;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border-left: 5px solid var(--primary-color); /* 左側新增強調線 */
-        }
-
-        .article:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 35px rgba(0,0,0,0.12);
-        }
-
-        .article h3 {
-            font-size: 1.7rem;
-            font-weight: 600;
-            margin-bottom: 15px;
-            color: var(--text-dark);
-        }
-
-        .article p {
-            color: var(--text-light);
-            line-height: 1.8;
-            font-size: 1.05rem;
-        }
-
-        /* --- 4. 頁尾 Footer --- */
-        footer {
-            background-color: #2c3e50;
-            color: #bdc3c7;
-            text-align: center;
-            padding: 30px 20px;
-        }
-
-        /* --- 5. 動畫與響應式 --- */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(25px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @media (max-width: 576px) {
-            .container-box {
-                padding: 40px 25px;
-                width: 95%;
-            }
-            h1 { font-size: 1.8rem; }
-            #articles h2 { font-size: 2rem; }
-            .article h3 { font-size: 1.4rem; }
-        }
-    </style>
 </head>
 
 <body>
@@ -219,7 +24,7 @@
         <div class="container-box">
             <img src="static/images/notme.jpg" alt="Jerry Kuo" class="profile-img">
             <h1>郭兆軒 (Jerry Kuo)</h1>
-            <p>{{data.home.title}},歡迎來到我的網站。</p>
+            <p>{{ data.home.title }} 歡迎來到我的網站。</p>
 
             <div class="d-grid gap-3 btn-container">
                 <a href="/portfolio" class="btn btn-custom-1 custom-btn"><i class="bi bi-briefcase-fill"></i> 我的作品</a>
@@ -232,24 +37,15 @@
         </a>
     </section>
 
-    <section id="articles">
-        <div class="container">
-            <h2>我的文章</h2>
+    <section id="articles" class="py-5" style="background-color: #f0f3f5;">
+        <div class="container text-center">
+            <h2 class="mb-4">📚 我的知識文章</h2>
+            <p class="lead mb-4" style="color: var(--text-light);">這裡收錄了我在軟體開發、網站技術和生活思考上的心得與筆記。</p>
+            
+            <a href="/articles" class="btn btn-lg btn-custom-1 custom-btn mx-auto" style="max-width: 300px; margin-top: 20px;">
+                <i class="bi bi-book-half"></i> 瀏覽所有文章與集數
+            </a>
 
-            <div class="article">
-                <h3>第一篇文章標題</h3>
-                <p>這裡是文章內容範例。你可以在這裡撰寫技術筆記、生活隨筆或學習心得。文字會自動換行，並在不同裝置上保持良好閱讀體驗。</p>
-            </div>
-
-            <div class="article">
-                <h3>第二篇文章標題</h3>
-                <p>你可以用這個版面持續新增文章。未來如果要改成從資料庫或 Markdown 匯入，我可以幫你擴充成 Blog 系統。</p>
-            </div>
-
-            <div class="article">
-                <h3>第三篇文章標題</h3>
-                <p>新增了第三篇文章作為範例，讓頁面看起來更豐富。同時也調整了文章卡片的行高與字體顏色，提升閱讀舒適度。</p>
-            </div>
         </div>
     </section>
     

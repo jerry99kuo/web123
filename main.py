@@ -7,6 +7,7 @@ from app.page_portfolio import router as portfolio_router
 from app.page_contact import router as contact_router
 from app.link import router as link_router
 from app.page_admin import router as admin_router
+from app.page_article import router as article_router
 
 app = FastAPI()
 
@@ -22,3 +23,4 @@ app.include_router(portfolio_router)
 app.include_router(contact_router)
 app.include_router(link_router)
 app.include_router(admin_router)
+app.include_router(article_router)

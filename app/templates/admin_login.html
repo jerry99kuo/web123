@@ -1,11 +1,66 @@
 <!DOCTYPE html>
-<html>
-<head><title>Admin Login</title></head>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>管理員登入</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
+
+    <style>
+        body {
+            background-color: var(--pico-background-color);
+            padding: var(--pico-spacing); 
+        }
+
+        /* 3. 提高 CSS 優先權並設定寬度 */
+        main.container {
+            width: 100%;
+            max-width: 400px; /* 改回 360px */
+            
+            /* 4. 關鍵：移除 Pico.css 預設的水平置中 (margin-left/right: auto) */
+            margin: 0; 
+        }
+        /* --- --- */
+
+         /* 錯誤訊息樣式 */
+        .error-message {
+            background-color: var(--pico-color-red-100);
+            border: 1px solid var(--pico-color-red-200);
+            color: var(--pico-color-red-700);
+            padding: var(--pico-spacing);
+            border-radius: var(--pico-border-radius);
+            margin-bottom: var(--pico-spacing);
+            text-align: center;
+        }
+    </style>
+</head>
 <body>
-    <h1>Admin Login</h1>
-    <form action="/admin" method="post">
-        <input type="password" name="password" placeholder="Password"/>
-        <button type="submit">登入</button>
-    </form>
+
+    <main class="container">
+        <article>
+            
+            <h2 style="text-align: center;">管理員登入</h2>
+
+            {% if 'error' in request.query_params %}
+                <div class="error-message">
+                    密碼錯誤，請重試。
+                </div>
+            {% endif %}
+
+            <form action="/admin" method="post">
+                <label for="password">密碼</label>
+                <input type="password" 
+                       id="password" 
+                       name="password" 
+                       placeholder="請輸入密碼" 
+                       required 
+                       autofocus />
+
+                <button type="submit">登入</button>
+            </form>
+
+        </article>
+    </main>
+
 </body>
 </html>
