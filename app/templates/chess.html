@@ -1,0 +1,94 @@
+    <!DOCTYPE html>
+    <html lang="zh-Hant">
+    <head>
+        <meta charset="UTF-8">
+        <title>Two Player Chess Game</title>
+
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        
+        <link rel="stylesheet" href="static/chessboard.min.css">
+        <script src="static/chessboard.min.js"></script>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+
+        <style>
+            #board { width: 480px; margin: 20px auto; }
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+            .center-text { text-align: center; }
+            .status-bar { 
+                font-size: 1.2em; 
+                margin-top: 20px; 
+                font-weight: bold;
+            }
+        </style>
+    </head>
+    <body>
+    <h2 class="center-text">雙人西洋棋</h2>
+    <p id="gameStatus" class="center-text status-bar">目前回合：白方</p>
+    <div id="board"></div>
+    <p class="center-text"><button onclick="resetGame()">重新開始遊戲</button></p>
+
+    <script>
+// 初始化棋盤邏輯
+let game = new Chess();
+let board = null;
+
+// 更新回合狀態
+function updateStatus() {
+    let moveColor = (game.turn() === 'w') ? '白方' : '黑方';
+    let status = '';
+
+    if (game.in_checkmate()) {
+        status = '遊戲結束，' + moveColor + '被將死。';
+    } else if (game.in_draw()) {
+        status = '遊戲結束，平局。';
+    } else {
+        status = '目前回合：' + moveColor;
+        if (game.in_check()) status += '（被將軍！）';
+    }
+
+    document.getElementById('gameStatus').innerText = status;
+}
+
+// 拖棋子檢查是否合法
+function onDragStart(source, piece, position, orientation) {
+    if (game.game_over()) return false;
+    if ((game.turn() === 'w' && piece.search(/^b/) !== -1) ||
+        (game.turn() === 'b' && piece.search(/^w/) !== -1)) return false;
+}
+
+// 放下棋子
+function onDrop(source, target) {
+    let move = game.move({ from: source, to: target, promotion: 'q' });
+    if (move === null) return 'snapback';
+    updateStatus();
+}
+
+// 移動動畫結束後更新棋盤
+function onSnapEnd() {
+    board.position(game.fen());
+}
+
+// Reset 遊戲
+function resetGame() {
+    game.reset();
+    board.start();
+    updateStatus();
+}
+
+// 初始化棋盤
+board = Chessboard('board', {
+    draggable: true,
+    position: 'start',
+    onDragStart: onDragStart,
+    onDrop: onDrop,
+    onSnapEnd: onSnapEnd,
+    pieceTheme: 'static/img/chesspieces/wikipedia/{piece}.png'
+});
+
+// 初始化狀態
+updateStatus();
+
+</script>
+</body>
+</html>

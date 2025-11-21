@@ -1,0 +1,85 @@
+body {
+  padding: 20px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #eaeef3ff;
+}
+
+h1 {
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+/* 1. CSS 修改：
+           - 移除 padding，因為我們要加在 <a> 上
+           - 增加 transition 讓 hover 動畫更平滑
+        */
+li {
+  /* padding: 10px; <-- 移除 */
+  background-color: #fff;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease-out; /* 增加 transition */
+}
+
+/* 2. NEW: 讓整個卡片都可以點擊 */
+ul li a {
+  display: block; /* 讓 <a> 填滿 <li> */
+  padding: 15px 20px; /* 增加點擊區域和內距 */
+  text-decoration: none;
+  color: #333; /* 連結文字顏色 */
+  font-weight: 500;
+}
+
+/* 3. NEW: 更好的 hover 效果 */
+li:hover {
+  transform: scale(1.02); /* 稍微放大 */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12); /* 陰影更明顯 */
+}
+
+a {
+  text-decoration: none;
+}
+
+.btn-custom {
+  margin-top: 20px;
+  padding: 10px 20px;
+  border-radius: 25px;
+  font-weight: 500;
+  color: #fff;
+  transition: all 0.3s ease;
+}
+
+.btn-home {
+  background-color: #0d6efd;
+}
+
+.btn-home:hover {
+  background-color: #ee0c0cff;
+}
+
+.btn-contact {
+  background-color: #198754;
+}
+
+.btn-contact:hover {
+  background-color: #ee0c0cff;
+}
+.btn-portfolio {
+  background-color: #10bfebff;
+}
+.btn-portfolio:hover {
+  background-color: #ee0c0cff;
+}
+@media (max-width: 600px) {
+  .btn-custom {
+    width: 100%;
+    text-align: center;
+  }
+}

@@ -1,237 +1,356 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>網站內容編輯</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
+    />
     <style>
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .success-message {
-            background-color: var(--pico-color-green-100);
-            border: 1px solid var(--pico-color-green-200);
-            color: var(--pico-color-green-700);
-            padding: var(--pico-spacing);
-            border-radius: var(--pico-border-radius);
-            margin-bottom: var(--pico-spacing);
-        }
-        .link-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr auto; 
-            grid-gap: var(--pico-spacing);
-            align-items: flex-end; 
-            margin-bottom: var(--pico-spacing);
-        }
-        .link-row label { margin-bottom: 0; }
-        
-        /* --- 1. 新增文章區塊的樣式 --- */
-        .article-entry {
-            border: 1px solid var(--pico-color-contrast-200);
-            border-radius: var(--pico-border-radius);
-            padding: var(--pico-spacing);
-            margin-bottom: var(--pico-spacing);
-            position: relative; /* 為了 "移除" 按鈕 */
-        }
-        .article-entry textarea {
-            min-height: 150px; /* 讓內容框高一點 */
-        }
-        .remove-article {
-            /* 放在右上角 */
-            position: absolute;
-            top: var(--pico-spacing);
-            right: var(--pico-spacing);
-            margin-left: var(--pico-spacing);
-        }
-        /* --- --- */
+      .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .success-message {
+        background-color: var(--pico-color-green-100);
+        border: 1px solid var(--pico-color-green-200);
+        color: var(--pico-color-green-700);
+        padding: var(--pico-spacing);
+        border-radius: var(--pico-border-radius);
+        margin-bottom: var(--pico-spacing);
+      }
+      .link-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr auto;
+        grid-gap: var(--pico-spacing);
+        align-items: flex-end;
+        margin-bottom: var(--pico-spacing);
+      }
+      .link-row label {
+        margin-bottom: 0;
+      }
 
+      /* --- 1. 新增文章區塊的樣式 --- */
+      .article-entry {
+        border: 1px solid var(--pico-color-contrast-200);
+        border-radius: var(--pico-border-radius);
+        padding: var(--pico-spacing);
+        margin-bottom: var(--pico-spacing);
+        position: relative; /* 為了 "移除" 按鈕 */
+      }
+      .article-entry textarea {
+        min-height: 150px; /* 讓內容框高一點 */
+      }
+      .remove-article {
+        /* 放在右上角 */
+        position: absolute;
+        top: var(--pico-spacing);
+        right: var(--pico-spacing);
+        margin-left: var(--pico-spacing);
+      }
+      /* --- --- */
     </style>
-</head>
-<body>
-    <main class="container" style="max-width: 960px;">
-        <article>
-            <header class="page-header">
-                <h2>網站內容編輯</h2>
-                <a href="/admin/logout" role="button" class="secondary">登出</a>
-            </header>
+  </head>
+  <body>
+    <main class="container" style="max-width: 960px">
+      <article>
+        <header class="page-header">
+          <h2>網站內容編輯</h2>
+          <a href="/admin/logout" role="button" class="secondary">登出</a>
+        </header>
 
-            {% if updated %}
-                <div class="success-message">
-                    資料已成功更新！
-                </div>
-            {% endif %}
+        {% if updated %}
+        <div class="success-message">資料已成功更新！</div>
+        {% endif %}
 
-            <form action="/admin/edit" method="post">
-                
-                <h3>首頁</h3>
-                <div class="grid">
+        <form action="/admin/edit" method="post">
+          <h3>首頁</h3>
+          <div class="grid">
+            <div>
+              <label for="home_title">Title:</label>
+              <input
+                type="text"
+                id="home_title"
+                name="home_title"
+                value="{{ data.home.title }}"
+              />
+            </div>
+            <div>
+              <label for="home_subtitle">Subtitle:</label>
+              <input
+                type="text"
+                id="home_subtitle"
+                name="home_subtitle"
+                value="{{ data.home.subtitle }}"
+              />
+            </div>
+          </div>
+          <h3>聯絡資訊</h3>
+          <div class="grid">
+            <div>
+              <label for="email">Email:</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value="{{ data.contact.email }}"
+              />
+            </div>
+            <div>
+              <label for="phone">Phone:</label>
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                value="{{ data.contact.phone }}"
+              />
+            </div>
+          </div>
+          <h3>連結</h3>
+          <div id="links-container">
+            {% for link in data.links %}
+            <div class="link-row">
+              <div>
+                <label>連結名稱:</label>
+                <input
+                  type="text"
+                  name="link_names"
+                  placeholder="例如：Google"
+                  value="{{ link.name }}"
+                />
+              </div>
+              <div>
+                <label>連結 URL:</label>
+                <input
+                  type="url"
+                  name="link_urls"
+                  placeholder="https://..."
+                  value="{{ link.url }}"
+                />
+              </div>
+              <button type="button" class="secondary outline remove-link">
+                移除
+              </button>
+            </div>
+            {% endfor %}
+          </div>
+          <button type="button" id="add-link" class="secondary">
+            新增連結
+          </button>
+
+          <hr />
+
+          <h3>文章</h3>
+
+          <div id="articles-container">
+            {% for article in data.articles %}
+            <details class="article-entry" open>
+              <summary>
+                <input
+                  type="hidden"
+                  name="article_ids"
+                  value="{{ article.id if article.id is defined else '' }}"
+                />
+
+                <label>文章標題:</label>
+                <input
+                  type="text"
+                  name="article_titles"
+                  placeholder="請輸入主文章標題"
+                  value="{{ article.title }}"
+                  required
+                />
+
+                <button
+                  type="button"
+                  class="secondary outline remove-article"
+                  style="position: absolute; right: 10px; top: 5px"
+                >
+                  移除整篇文章
+                </button>
+              </summary>
+
+              <div>
+                <label>文章摘要 (顯示在列表):</label>
+                <textarea
+                  name="article_summaries"
+                  placeholder="請輸入文章摘要..."
+                >
+{{ article.summary }}</textarea
+                >
+              </div>
+
+              <h4>集數/章節內容</h4>
+              <div class="chapters-container">
+                {% for chapter in article.chapters %}
+                <div class="chapter-entry">
+                  <input
+                    type="hidden"
+                    name="chapter_ids_{{ article.id }}"
+                    value="{{ chapter.chapter_id if chapter.chapter_id is defined else '' }}"
+                  />
+
+                  <div class="grid">
                     <div>
-                        <label for="home_title">Title:</label>
-                        <input type="text" id="home_title" name="home_title" value="{{ data.home.title }}" />
+                      <label>集數標題:</label>
+                      <input
+                        type="text"
+                        name="chapter_titles_{{ article.id }}"
+                        placeholder="例如：第一集：變數與資料型態"
+                        value="{{ chapter.chapter_title }}"
+                        required
+                      />
                     </div>
-                    <div>
-                        <label for="home_subtitle">Subtitle:</label>
-                        <input type="text" id="home_subtitle" name="home_subtitle" value="{{ data.home.subtitle }}" />
-                    </div>
+                    <button
+                      type="button"
+                      class="secondary outline remove-chapter"
+                    >
+                      移除集數
+                    </button>
+                  </div>
+                  <div>
+                    <label>集數內容:</label>
+                    <textarea
+                      name="chapter_contents_{{ article.id }}"
+                      placeholder="請輸入該集數的詳細內容..."
+                    >
+{{ chapter.content }}</textarea
+                    >
+                  </div>
+                  <hr
+                    style="
+                      border-top: 1px dashed var(--pico-color-contrast-100);
+                      margin: 10px 0;
+                    "
+                  />
                 </div>
-                <h3>聯絡資訊</h3>
-                <div class="grid">
-                    <div>
-                        <label for="email">Email:</label>
-                        <input type="email" id="email" name="email" value="{{ data.contact.email }}" />
-                    </div>
-                    <div>
-                        <label for="phone">Phone:</label>
-                        <input type="tel" id="phone" name="phone" value="{{ data.contact.phone }}" />
-                    </div>
-                </div>
-                <h3>連結</h3>
-                <div id="links-container">
-                    {% for link in data.links %}
-                    <div class="link-row">
-                        <div>
-                            <label>連結名稱:</label>
-                            <input type="text" name="link_names" placeholder="例如：Google" value="{{ link.name }}" />
-                        </div>
-                        <div>
-                            <label>連結 URL:</label>
-                            <input type="url" name="link_urls" placeholder="https://..." value="{{ link.url }}" />
-                        </div>
-                        <button type="button" class="secondary outline remove-link">移除</button>
-                    </div>
-                    {% endfor %}
-                </div>
-                <button type="button" id="add-link" class="secondary">新增連結</button>
-                
-                <hr>
+                {% endfor %}
+              </div>
 
-                <h3>文章</h3>
-                                
-                <div id="articles-container">
-                    {% for article in data.articles %}
-                    <details class="article-entry" open>
-                        <summary>
-                            <input type="hidden" name="article_ids" value="{{ article.id if article.id is defined else '' }}" />
-                            
-                            <label>文章標題:</label>
-                            <input type="text" name="article_titles" placeholder="請輸入主文章標題" value="{{ article.title }}" required />
-                            
-                            <button type="button" class="secondary outline remove-article" style="position: absolute; right: 10px; top: 5px;">移除整篇文章</button>
-                        </summary>
-                        
-                        <div>
-                            <label>文章摘要 (顯示在列表):</label>
-                            <textarea name="article_summaries" placeholder="請輸入文章摘要...">{{ article.summary }}</textarea>
-                        </div>
-                        
-                        <h4>集數/章節內容</h4>
-                        <div class="chapters-container">
-                            {% for chapter in article.chapters %}
-                            <div class="chapter-entry">
-                                <input type="hidden" name="chapter_ids_{{ article.id }}" value="{{ chapter.chapter_id if chapter.chapter_id is defined else '' }}" />
-                                
-                                <div class="grid">
-                                    <div>
-                                        <label>集數標題:</label>
-                                        <input type="text" name="chapter_titles_{{ article.id }}" placeholder="例如：第一集：變數與資料型態" value="{{ chapter.chapter_title }}" required />
-                                    </div>
-                                    <button type="button" class="secondary outline remove-chapter">移除集數</button>
-                                </div>
-                                <div>
-                                    <label>集數內容:</label>
-                                    <textarea name="chapter_contents_{{ article.id }}" placeholder="請輸入該集數的詳細內容...">{{ chapter.content }}</textarea>
-                                </div>
-                                <hr style="border-top: 1px dashed var(--pico-color-contrast-100); margin: 10px 0;">
-                            </div>
-                            {% endfor %}
-                        </div>
-                        
-                        <button type="button" class="secondary add-chapter-btn">新增集數</button>
-                    </details>
-                    {% endfor %}
-                </div>
+              <button type="button" class="secondary add-chapter-btn">
+                新增集數
+              </button>
+            </details>
+            {% endfor %}
+          </div>
 
-                <button type="button" id="add-article" class="secondary">新增文章</button>
+          <button type="button" id="add-article" class="secondary">
+            新增文章
+          </button>
 
-                <hr> 
-                <button type="submit">儲存變更</button>
-            </form>
-        </article>
+          <hr />
+          <button type="submit">儲存變更</button>
+        </form>
+      </article>
     </main>
 
     <template id="link-template">
-        <div class="link-row">
-            <div>
-                <label>連結名稱:</label>
-                <input type="text" name="link_names" placeholder="例如：Google" />
-            </div>
-            <div>
-                <label>連結 URL:</label>
-                <input type="url" name="link_urls" placeholder="https://..." />
-            </div>
-            <button type="button" class="secondary outline remove-link">移除</button>
+      <div class="link-row">
+        <div>
+          <label>連結名稱:</label>
+          <input type="text" name="link_names" placeholder="例如：Google" />
         </div>
+        <div>
+          <label>連結 URL:</label>
+          <input type="url" name="link_urls" placeholder="https://..." />
+        </div>
+        <button type="button" class="secondary outline remove-link">
+          移除
+        </button>
+      </div>
     </template>
 
     <template id="article-template">
-        <details class="article-entry" open>
-            <summary>
-                <input type="hidden" name="article_ids" value="" /> 
-                <label>文章標題:</label>
-                <input type="text" name="article_titles" placeholder="請輸入主文章標題" required />
-                <button type="button" class="secondary outline remove-article" style="position: absolute; right: 10px; top: 5px;">移除整篇文章</button>
-            </summary>
-            
-            <div>
-                <label>文章摘要 (顯示在列表):</label>
-                <textarea name="article_summaries" placeholder="請輸入文章摘要..."></textarea>
-            </div>
-            
-            <h4>集數/章節內容</h4>
-            <div class="chapters-container">
-                </div>
-            <button type="button" class="secondary add-chapter-btn">新增集數</button>
-        </details>
+      <details class="article-entry" open>
+        <summary>
+          <input type="hidden" name="article_ids" value="" />
+          <label>文章標題:</label>
+          <input
+            type="text"
+            name="article_titles"
+            placeholder="請輸入主文章標題"
+            required
+          />
+          <button
+            type="button"
+            class="secondary outline remove-article"
+            style="position: absolute; right: 10px; top: 5px"
+          >
+            移除整篇文章
+          </button>
+        </summary>
+
+        <div>
+          <label>文章摘要 (顯示在列表):</label>
+          <textarea
+            name="article_summaries"
+            placeholder="請輸入文章摘要..."
+          ></textarea>
+        </div>
+
+        <h4>集數/章節內容</h4>
+        <div class="chapters-container"></div>
+        <button type="button" class="secondary add-chapter-btn">
+          新增集數
+        </button>
+      </details>
     </template>
 
     <template id="chapter-template">
-        <div class="chapter-entry">
-            <input type="hidden" name="chapter_ids_PLACEHOLDER" value="" />
-            <div class="grid">
-                <div>
-                    <label>集數標題:</label>
-                    <input type="text" name="chapter_titles_PLACEHOLDER" placeholder="例如：第一集：變數與資料型態" required />
-                </div>
-                <button type="button" class="secondary outline remove-chapter">移除集數</button>
-            </div>
-            <div>
-                <label>集數內容:</label>
-                <textarea name="chapter_contents_PLACEHOLDER" placeholder="請輸入該集數的詳細內容..."></textarea>
-            </div>
-            <hr style="border-top: 1px dashed var(--pico-color-contrast-100); margin: 10px 0;">
+      <div class="chapter-entry">
+        <input type="hidden" name="chapter_ids_PLACEHOLDER" value="" />
+        <div class="grid">
+          <div>
+            <label>集數標題:</label>
+            <input
+              type="text"
+              name="chapter_titles_PLACEHOLDER"
+              placeholder="例如：第一集：變數與資料型態"
+              required
+            />
+          </div>
+          <button type="button" class="secondary outline remove-chapter">
+            移除集數
+          </button>
         </div>
+        <div>
+          <label>集數內容:</label>
+          <textarea
+            name="chapter_contents_PLACEHOLDER"
+            placeholder="請輸入該集數的詳細內容..."
+          ></textarea>
+        </div>
+        <hr
+          style="
+            border-top: 1px dashed var(--pico-color-contrast-100);
+            margin: 10px 0;
+          "
+        />
+      </div>
     </template>
 
     <script>
-    document.addEventListener("DOMContentLoaded", () => {
+      document.addEventListener("DOMContentLoaded", () => {
         // --- 連結 JS (保持不變) ---
         const linksContainer = document.getElementById("links-container");
         const addLinkButton = document.getElementById("add-link");
         const linkTemplate = document.getElementById("link-template");
 
         addLinkButton.addEventListener("click", () => {
-            const newLinkRow = linkTemplate.content.cloneNode(true);
-            linksContainer.appendChild(newLinkRow);
+          const newLinkRow = linkTemplate.content.cloneNode(true);
+          linksContainer.appendChild(newLinkRow);
         });
 
         linksContainer.addEventListener("click", (e) => {
-            if (e.target && e.target.classList.contains("remove-link")) {
-                const rowToRemove = e.target.closest(".link-row");
-                if (rowToRemove) { rowToRemove.remove(); }
+          if (e.target && e.target.classList.contains("remove-link")) {
+            const rowToRemove = e.target.closest(".link-row");
+            if (rowToRemove) {
+              rowToRemove.remove();
             }
+          }
         });
 
         // --- 文章與集數 JS (修訂後) ---
@@ -240,90 +359,105 @@
         const articleTemplate = document.getElementById("article-template");
         const chapterTemplate = document.getElementById("chapter-template");
 
-        let tempArticleIdCounter = 10000; 
+        let tempArticleIdCounter = 10000;
 
         // 函式：創建並新增一個集數 DOM 元素
         const createChapter = (chaptersContainer, articleId) => {
-            const newChapterClone = chapterTemplate.content.cloneNode(true);
-            const chapterEntry = newChapterClone.querySelector('.chapter-entry');
-            
-            // 替換佔位符，確保 input name 屬於這個文章 ID
-            // ⚠️ 關鍵修正：將 chapter ID 也設為臨時 ID，確保與後端 None/new_ 判斷一致
-            const tempChapterId = `new_ch_${Date.now()}`;
-            
-            chapterEntry.querySelector('input[name^="chapter_ids_"]').name = `chapter_ids_${articleId}`;
-            chapterEntry.querySelector('input[name^="chapter_ids_"]').value = tempChapterId; // 新增時賦予臨時ID
-            
-            chapterEntry.querySelector('input[name^="chapter_titles_"]').name = `chapter_titles_${articleId}`;
-            chapterEntry.querySelector('textarea[name^="chapter_contents_"]').name = `chapter_contents_${articleId}`;
-            
-            chaptersContainer.appendChild(chapterEntry);
+          const newChapterClone = chapterTemplate.content.cloneNode(true);
+          const chapterEntry = newChapterClone.querySelector(".chapter-entry");
+
+          // 替換佔位符，確保 input name 屬於這個文章 ID
+          // ⚠️ 關鍵修正：將 chapter ID 也設為臨時 ID，確保與後端 None/new_ 判斷一致
+          const tempChapterId = `new_ch_${Date.now()}`;
+
+          chapterEntry.querySelector(
+            'input[name^="chapter_ids_"]'
+          ).name = `chapter_ids_${articleId}`;
+          chapterEntry.querySelector('input[name^="chapter_ids_"]').value =
+            tempChapterId; // 新增時賦予臨時ID
+
+          chapterEntry.querySelector(
+            'input[name^="chapter_titles_"]'
+          ).name = `chapter_titles_${articleId}`;
+          chapterEntry.querySelector(
+            'textarea[name^="chapter_contents_"]'
+          ).name = `chapter_contents_${articleId}`;
+
+          chaptersContainer.appendChild(chapterEntry);
         };
 
         // 函式：初始化單個文章區塊的事件
         const initializeArticleEvents = (articleEntry, isNew = false) => {
-            const chaptersContainer = articleEntry.querySelector('.chapters-container');
-            let articleId = articleEntry.querySelector('input[name="article_ids"]').value;
+          const chaptersContainer = articleEntry.querySelector(
+            ".chapters-container"
+          );
+          let articleId = articleEntry.querySelector(
+            'input[name="article_ids"]'
+          ).value;
 
-            // 如果是新的文章，從 input 中獲取臨時 ID
-            if (isNew) {
-                articleId = articleEntry.querySelector('input[name="article_ids"]').value;
-            }
-            
-            // 處理「新增集數」按鈕的點擊事件
-            const addChapterBtn = articleEntry.querySelector('.add-chapter-btn');
-            addChapterBtn.addEventListener('click', () => {
-                // 傳遞正確的文章 ID (可能是數字或 new_xxxx)
-                createChapter(chaptersContainer, articleId); 
-            });
-            
-            // 如果是新的文章，預設新增一個空集數
-            if (isNew) {
-                createChapter(chaptersContainer, articleId);
-            }
+          // 如果是新的文章，從 input 中獲取臨時 ID
+          if (isNew) {
+            articleId = articleEntry.querySelector(
+              'input[name="article_ids"]'
+            ).value;
+          }
+
+          // 處理「新增集數」按鈕的點擊事件
+          const addChapterBtn = articleEntry.querySelector(".add-chapter-btn");
+          addChapterBtn.addEventListener("click", () => {
+            // 傳遞正確的文章 ID (可能是數字或 new_xxxx)
+            createChapter(chaptersContainer, articleId);
+          });
+
+          // 如果是新的文章，預設新增一個空集數
+          if (isNew) {
+            createChapter(chaptersContainer, articleId);
+          }
         };
 
-
         // --- 處理現有文章的事件初始化 (頁面載入時) ---
-        document.querySelectorAll('.article-entry').forEach(articleEntry => {
-            initializeArticleEvents(articleEntry, false);
+        document.querySelectorAll(".article-entry").forEach((articleEntry) => {
+          initializeArticleEvents(articleEntry, false);
         });
-
 
         // --- 處理「新增文章」事件 ---
         addArticleButton.addEventListener("click", () => {
-            const tempId = `new_${tempArticleIdCounter++}`; // 建立臨時 ID
-            const newArticleClone = articleTemplate.content.cloneNode(true);
-            const newArticleEntry = newArticleClone.querySelector('.article-entry');
+          const tempId = `new_${tempArticleIdCounter++}`; // 建立臨時 ID
+          const newArticleClone = articleTemplate.content.cloneNode(true);
+          const newArticleEntry =
+            newArticleClone.querySelector(".article-entry");
 
-            // 設置臨時 ID 給文章本身
-            newArticleEntry.querySelector('input[name="article_ids"]').value = tempId;
-            
-            // 初始化新文章的事件（並預設新增一集）
-            initializeArticleEvents(newArticleEntry, true); 
-            
-            articlesContainer.appendChild(newArticleEntry);
+          // 設置臨時 ID 給文章本身
+          newArticleEntry.querySelector('input[name="article_ids"]').value =
+            tempId;
+
+          // 初始化新文章的事件（並預設新增一集）
+          initializeArticleEvents(newArticleEntry, true);
+
+          articlesContainer.appendChild(newArticleEntry);
         });
-        
+
         // --- 處理事件代理：移除文章/集數 (使用事件冒泡) ---
         articlesContainer.addEventListener("click", (e) => {
-            // 移除整篇文章
-            if (e.target && e.target.classList.contains("remove-article")) {
-                const entryToRemove = e.target.closest(".article-entry");
-                if (entryToRemove) { entryToRemove.remove(); }
-                return;
+          // 移除整篇文章
+          if (e.target && e.target.classList.contains("remove-article")) {
+            const entryToRemove = e.target.closest(".article-entry");
+            if (entryToRemove) {
+              entryToRemove.remove();
             }
+            return;
+          }
 
-            // 移除單個集數
-            if (e.target && e.target.classList.contains("remove-chapter")) {
-                const chapterToRemove = e.target.closest(".chapter-entry");
-                if (chapterToRemove) { chapterToRemove.remove(); }
-                return;
+          // 移除單個集數
+          if (e.target && e.target.classList.contains("remove-chapter")) {
+            const chapterToRemove = e.target.closest(".chapter-entry");
+            if (chapterToRemove) {
+              chapterToRemove.remove();
             }
+            return;
+          }
         });
-
-    });
-</script>
-
-</body>
+      });
+    </script>
+  </body>
 </html>
