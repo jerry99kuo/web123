@@ -12,7 +12,7 @@ from app.page_chess import router as chess_router
 
 
 app = FastAPI()
-
+#test
 # 靜態檔
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
