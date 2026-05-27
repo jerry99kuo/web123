@@ -1,85 +1,45 @@
-from fastapi import APIRouter, Request, HTTPException
+from fastapi import APIRouter, Request, HTTPException, Depends
 from fastapi.templating import Jinja2Templates
-from typing import Any, Dict, Optional
+from sqlmodel import Session, select
 
-# 🌟 導入 load_data 函式，假設它位於 app.page_admin 模組中
-# ⚠️ 注意：如果你的 load_data 在不同的檔案，請修改此行
-try:
-    from .page_admin import load_data
-except ImportError:
-    # 如果找不到，則使用一個簡單的預設資料，但在生產環境中應該修復導入路徑
-    def load_data():
-        return {
-            "home": {"title": "軟體開發者 | 網站工程師"},
-            "articles": [
-                {
-                    "id": 1,
-                    "title": "（錯誤：未找到 data.json）",
-                    "summary": "請檢查後台 page_admin.py 的 load_data 導入路徑。",
-                    "chapters": [],
-                },
-            ]
-        }
+from app.models import Article, SiteConfig, get_session
 
-
-# --- 初始化 ---
+router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
-# 建立 FastAPI 路由實例
-router = APIRouter()
-
-# ----------------------------------------------------
-# 路由 (Endpoints)
-# ----------------------------------------------------
-
-# --- 定義文章列表路由 ---
+# --- 文章列表頁面 ---
 @router.get("/articles")
-async def articles_list(request: Request):
-    """
-    顯示所有文章的列表頁面 (articles.html)。
-    URL: /articles
-    """
-    # 🌟 從 JSON 檔案載入最新的資料
-    data = load_data() 
+async def articles_list(request: Request, session: Session = Depends(get_session)):
     
-    # 檢查是否成功載入
-    if "articles" not in data:
-        data["articles"] = []
-        
-    # 傳遞完整的 data 給模板
-    return templates.TemplateResponse(
-        "articles.html", 
-        {"request": request, "data": data}
-    )
+    # 【資料庫查詢】把 Article 資料表裡面的「所有」文章都抓出來 (all)
+    articles = session.exec(select(Article)).all()
+    
+    # 抓取網站設定 (為了顯示網頁上方的共通標題)
+    config = session.exec(select(SiteConfig)).first()
+    
+    # 包裝給 HTML 使用
+    data = {
+        "home": {
+            "title": config.home_title if config else "",
+            "subtitle": config.home_subtitle if config else ""
+        },
+        "articles": articles
+    }
+    return templates.TemplateResponse("articles.html", {"request": request, "data": data})
 
-# --- 定義單篇文章詳情路由 (支援集數導航) ---
+# --- 單篇文章詳情頁面 ---
 @router.get("/article/{article_id}")
-async def article_detail(request: Request, article_id: int):
-    """
-    顯示單篇文章的詳情頁面 (article_detail.html)。
-    它會根據 article_id 找到對應的文章資料。
-    URL: /article/1
-    """
-    # 🌟 從 JSON 檔案載入最新的資料
-    data = load_data() 
+async def article_detail(request: Request, article_id: int, session: Session = Depends(get_session)):
     
-    # 尋找與 article_id 相符的文章
-    article: Optional[Dict[str, Any]] = next(
-        (a for a in data.get('articles', []) if a.get('id') == article_id), None
-    )
-
+    # 【資料庫查詢：終極魔法】直接用 ID 向資料庫要特定的一篇文章。找不到就會回傳 None
+    # 附註：用這種方式抓出來的 article，SQLModel 會自動把底下的 chapters 也一併抓出來！
+    article = session.get(Article, article_id)
+    
+    # 如果資料庫裡沒有這個 ID 的文章，就丟出 404 找不到網頁的錯誤
     if article is None:
-        # 如果找不到文章，導向 404
-        # 這裡使用 HTTPException 確保狀態碼正確，並提供一個簡單的錯誤頁面
-        raise HTTPException(status_code=404, detail="Article not found")
-
-    # 傳遞單篇文章資料給模板
-    return templates.TemplateResponse(
-        "article_detail.html", 
-        {"request": request, "article": article, "data": data} # 傳遞 data 以便獲取 home 等通用資訊
-    )
-
-# ⚠️ 附註：
-# 1. 為了讓 article_detail 也能拿到 home.title 等通用資訊，我新增了 "data": data 到 article_detail 的 context 中。
-# 2. 我用 load_data() 替換了寫死的 data 字典。
-# 3. 如果找不到文章，我使用 HTTPException(404) 來代替重導向到 index.html。
+        raise HTTPException(status_code=404, detail="找不到該篇文章")
+        
+    config = session.exec(select(SiteConfig)).first()
+    data = {"home": {"title": config.home_title if config else ""}}
+    
+    return templates.TemplateResponse("article_detail.html", {"request": request, "article": article, "data": data})
