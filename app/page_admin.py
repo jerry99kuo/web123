@@ -1,15 +1,15 @@
 from fastapi import APIRouter, Request, Form, Response, Cookie, Depends, HTTPException
 from fastapi.responses import RedirectResponse, HTMLResponse
-import json
-import os
-from typing import Optional, List, Any, Dict
 from fastapi.templating import Jinja2Templates
+from typing import Optional, List
+import os
+
+# 🔽 引入 SQLModel 相關工具與你的資料模型
+from sqlmodel import Session, select, delete
+from app.models import SiteConfig, Link, Article, Chapter, engine, get_session
 
 router = APIRouter()
-# 假設 templates 已經在 main.py 中設定，但在此路由檔案中重新定義以確保可用性
 templates = Jinja2Templates(directory="app/templates") 
-
-DATA_FILE = "app/data.json"
 
 # --- 安全性設定 ---
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "1234")
@@ -17,78 +17,12 @@ SESSION_SECRET_VALUE = os.getenv("SESSION_SECRET_VALUE", "CHANGE_ME_TO_A_VERY_SE
 SESSION_COOKIE_NAME = "admin_session"
 # ---
 
-# ----------------------------------------------------
-# 🌟 資料處理與 ID 賦值邏輯 (用於支援新增/編輯/刪除)
-# ----------------------------------------------------
-def load_data() -> Dict[str, Any]:
-    """
-    載入數據，如果檔案不存在則創建預設結構，並處理舊資料遷移。
-    """
-    if not os.path.exists(DATA_FILE):
-        default_data = {
-            "home": {"title": "", "subtitle": ""},
-            "contact": {"email": "", "phone": ""},
-            "links": [], 
-            "articles": []
-        }
-        save_data(default_data)
-        return default_data
-    
-    try:
-        with open(DATA_FILE, "r", encoding="utf-8") as f:
-            data = json.load(f)
-    except json.JSONDecodeError:
-        # 如果 JSON 損壞，返回一個空結構以防止崩潰
-        return {"home": {"title": "", "subtitle": ""}, "contact": {"email": "", "phone": ""}, "links": [], "articles": []}
-
-    # 確保 articles 欄位存在 (處理舊資料遷移)
-    if "articles" not in data or not isinstance(data["articles"], list):
-        data["articles"] = []
-    
-    # 保留你的舊 links 遷移邏輯
-    if "links" not in data or isinstance(data["links"], dict):
-        # 這裡的邏輯與你提供的原始程式碼相似，用於處理舊版 links 格式
-        pass 
-
-    return data
-
-
-def assign_ids_before_save(data: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    在儲存前，檢查並為所有沒有 ID (或帶有臨時 ID 'new_') 的文章和集數分配新的數字 ID。
-    """
-    # 尋找目前最大的文章 ID
-    max_article_id = 0
-    for a in data.get('articles', []):
-        if isinstance(a.get('id'), int):
-            max_article_id = max(max_article_id, a['id'])
-
-    for article in data['articles']:
-        # 1. 處理文章 ID
-        if article.get('id') is None or (isinstance(article.get('id'), str) and article.get('id', '').startswith("new_")):
-            max_article_id += 1
-            article['id'] = max_article_id
-        
-        # 2. 處理集數 ID
-        max_chapter_id = 0
-        for c in article.get('chapters', []):
-             if isinstance(c.get('chapter_id'), int):
-                max_chapter_id = max(max_chapter_id, c['chapter_id'])
-                
-        for chapter in article['chapters']:
-            if chapter.get('chapter_id') is None or (isinstance(chapter.get('chapter_id'), str) and chapter.get('chapter_id', '').startswith("new_")):
-                max_chapter_id += 1
-                chapter['chapter_id'] = max_chapter_id
-                
-    return data
-
-def save_data(data: Dict[str, Any]):
-    """ 
-    將數據儲存到 JSON 檔案，並在儲存前處理 ID 分配。
-    """
-    data_to_save = assign_ids_before_save(data)
-    with open(DATA_FILE, "w", encoding="utf-8") as f:
-        json.dump(data_to_save, f, ensure_ascii=False, indent=4)
+# ==========================================
+# 取得資料庫連線 (Dependency)
+# ==========================================
+def get_session():
+    with Session(engine) as session:
+        yield session
 
 # --- 登入驗證 (Dependency) ---
 async def get_current_admin(admin_session: Optional[str] = Cookie(default=None)):
@@ -96,18 +30,20 @@ async def get_current_admin(admin_session: Optional[str] = Cookie(default=None))
         raise HTTPException(status_code=302, detail="Unauthorized", headers={"Location": "/admin"})
     return True 
 
-# --- 路由 (Endpoints) ---
+# ==========================================
+# 路由 (Endpoints)
+# ==========================================
 
-# 登入頁 (GET)
+# 1. 登入頁 (GET)
 @router.get("/admin")
 def admin(request: Request):
     return templates.TemplateResponse("admin_login.html", {"request": request})
 
-# 處理登入 (POST)
+# 2. 處理登入 (POST)
 @router.post("/admin")
 def admin_login(password: str = Form(...)):
     if password == ADMIN_PASSWORD:
-        response = RedirectResponse(f"/admin/edit", status_code=303)
+        response = RedirectResponse("/admin/edit", status_code=303)
         response.set_cookie(
             key=SESSION_COOKIE_NAME,
             value=SESSION_SECRET_VALUE,
@@ -118,22 +54,54 @@ def admin_login(password: str = Form(...)):
     else:
         return RedirectResponse("/admin?error=true", status_code=303)
 
-# 編輯頁 (GET)
+# 3. 編輯頁 (GET) - 將資料庫資料包裝成原本的格式給 HTML 使用
 @router.get("/admin/edit")
-def admin_edit(request: Request, is_logged_in: bool = Depends(get_current_admin)):
+def admin_edit(request: Request, session: Session = Depends(get_session), is_logged_in: bool = Depends(get_current_admin)):
     query_params = request.query_params
     updated = "updated" in query_params
-    data = load_data()
+    
+    # 從資料庫撈取所有資料
+    config = session.exec(select(SiteConfig)).first()
+    links = session.exec(select(Link)).all()
+    articles = session.exec(select(Article)).all()
+
+    # 如果 config 不存在（資料庫剛建好），給個預設值防呆
+    if not config:
+        config = SiteConfig(home_title="", home_subtitle="", email="", phone_number="")
+
+    # 將資料庫物件轉換成 Jinja2 模板 (admin_edit.html) 習慣的字典格式
+    # 這樣你的前端 HTML 就完全不用修改！
+    data = {
+        "home": {"title": config.home_title, "subtitle": config.home_subtitle},
+        "contact": {"email": config.email, "phone": config.phone_number},
+        "links": [{"name": link.name, "url": link.url} for link in links],
+        "articles": []
+    }
+
+    # 組合文章與集數
+    for a in articles:
+        article_dict = {
+            "id": a.id,
+            "title": a.title,
+            "summary": a.summary,
+            "chapters": [
+                {"chapter_id": c.id, "chapter_title": c.title, "content": c.content} 
+                for c in a.chapters
+            ]
+        }
+        data["articles"].append(article_dict)
+
     return templates.TemplateResponse("admin_edit.html", {
         "request": request, 
         "data": data,
         "updated": updated
     })
 
-# 處理資料更新 (POST)
+# 4. 處理資料更新 (POST) - 核心同步邏輯
 @router.post("/admin/edit")
 async def admin_update(
     request: Request, 
+    session: Session = Depends(get_session),
     is_logged_in: bool = Depends(get_current_admin), 
     home_title: str = Form(...),
     home_subtitle: str = Form(...),
@@ -141,118 +109,100 @@ async def admin_update(
     phone: str = Form(...),
     link_names: List[str] = Form(default=[]), 
     link_urls: List[str] = Form(default=[]),
-    
-    # 接收文章主體的欄位
     article_ids: List[str] = Form(default=[]), 
     article_titles: List[str] = Form(default=[]),
     article_summaries: List[str] = Form(default=[]),
 ):
-    
-    data = load_data() 
-    
-    # 獲取完整的表單資料 (用於讀取動態命名的集數欄位)
     form = await request.form() 
 
-    # 1. 儲存 Home 和 Contact
-    data["home"]["title"] = home_title
-    data["home"]["subtitle"] = home_subtitle
-    data["contact"]["email"] = email
-    data["contact"]["phone"] = phone
-    
-    # 2. 重新組合 links 列表 
-    new_links = []
+    # --- 1. 更新首頁與聯絡資訊 (SiteConfig) ---
+    config = session.exec(select(SiteConfig)).first()
+    if not config:
+        config = SiteConfig(home_title=home_title, home_subtitle=home_subtitle, email=email, phone_number=phone)
+        session.add(config)
+    else:
+        config.home_title = home_title
+        config.home_subtitle = home_subtitle
+        config.email = email
+        config.phone_number = phone
+
+    # --- 2. 更新常用連結 (Links) ---
+    # 最簡單的同步法：把舊的連結全刪了，重新寫入表單送來的新連結
+    session.exec(delete(Link))
     for name, url in zip(link_names, link_urls):
         if name and url:
-            new_links.append({"name": name, "url": url})
-    data["links"] = new_links 
-    
-    # ----------------------------------------------------
-    # 3. 處理文章與集數 (核心邏輯)
-    # ----------------------------------------------------
-    new_articles = []
-    
+            session.add(Link(name=name, url=url))
+
+    # --- 3. 更新文章與集數 (Articles & Chapters) ---
+    existing_articles = session.exec(select(Article)).all()
+    existing_article_map = {str(a.id): a for a in existing_articles}
+    submitted_article_ids = set() # 用來記錄哪些文章被保留下來
+
     if article_ids and article_titles:
-        # 遍歷所有文章
         for i, article_id_str in enumerate(article_ids):
+            if i >= len(article_titles): continue
             
-            # 確保文章主體欄位存在
-            if i >= len(article_titles) or i >= len(article_summaries):
-                 continue
+            title = article_titles[i]
+            summary = article_summaries[i] if i < len(article_summaries) else ""
+            if not title: continue # 標題空白視為無效
 
-            article_title = article_titles[i]
-            article_summary = article_summaries[i]
-            
-            # 如果文章標題為空，則跳過，視為被刪除的文章
-            if not article_title:
-                 continue
-
-            # 根據 ID 類型決定儲存方式
-            if article_id_str.isdigit():
-                article_id = int(article_id_str)
-            elif article_id_str.startswith("new_"):
-                article_id = article_id_str # 保持臨時 ID
+            # A. 處理文章本身 (更新或新增)
+            if article_id_str.isdigit() and article_id_str in existing_article_map:
+                # 這是舊文章，更新它
+                article = existing_article_map[article_id_str]
+                article.title = title
+                article.summary = summary
+                submitted_article_ids.add(article_id_str)
             else:
-                article_id = None
-                
-            article_obj = {
-                "id": article_id, 
-                "title": article_title,
-                "summary": article_summary,
-                "chapters": []
-            }
+                # 這是新文章 (前端傳來的可能是 new_XXXX)
+                article = Article(title=title, summary=summary)
+                session.add(article)
 
-            # 📌 文章 ID (可能是數字或 'new_XXXX') 用於動態欄位名稱
+            # B. 處理這篇文章底下的集數 (Chapters)
             field_id = str(article_id_str) 
-            
             chapter_ids = form.getlist(f"chapter_ids_{field_id}")
             chapter_titles = form.getlist(f"chapter_titles_{field_id}")
             chapter_contents = form.getlist(f"chapter_contents_{field_id}")
-            
-            
-            # 遍歷集數
-            if chapter_ids:
-                for j, chapter_id_str in enumerate(chapter_ids):
-                    # 確保所有集數欄位都有值
-                    if j < len(chapter_titles) and j < len(chapter_contents):
-                        
-                        chapter_title = chapter_titles[j]
-                        chapter_content = chapter_contents[j]
-                        
-                        # 確保集數標題和內容不為空
-                        if chapter_title and chapter_content: 
-                            
-                            # 根據 ID 類型決定儲存方式
-                            if chapter_id_str.isdigit():
-                                chapter_id = int(chapter_id_str)
-                            elif chapter_id_str.startswith("new_"):
-                                chapter_id = chapter_id_str # 保持臨時 ID
-                            else:
-                                chapter_id = None
-                            
-                            chapter_obj = {
-                                "chapter_id": chapter_id,
-                                "chapter_title": chapter_title,
-                                "content": chapter_content,
-                            }
-                            article_obj['chapters'].append(chapter_obj)
-            
-            # 只有文章內有內容或集數時才保留
-            if article_obj['title'] or article_obj['chapters']:
-                 new_articles.append(article_obj)
-                 
-    data["articles"] = new_articles
-    
-    # 4. 儲存到檔案 (會自動處理 ID 賦值)
-    save_data(data)
+
+            existing_chapter_map = {str(c.id): c for c in article.chapters}
+            submitted_chapter_ids = set()
+
+            for j, chapter_id_str in enumerate(chapter_ids):
+                if j >= len(chapter_titles) or j >= len(chapter_contents): continue
+                
+                c_title = chapter_titles[j]
+                c_content = chapter_contents[j]
+                if not c_title or not c_content: continue
+
+                if chapter_id_str.isdigit() and chapter_id_str in existing_chapter_map:
+                    # 舊集數，更新它
+                    chapter = existing_chapter_map[chapter_id_str]
+                    chapter.title = c_title
+                    chapter.content = c_content
+                    submitted_chapter_ids.add(chapter_id_str)
+                else:
+                    # 新集數，加進文章中 (SQLModel 會自動綁定關聯)
+                    new_chapter = Chapter(title=c_title, content=c_content)
+                    article.chapters.append(new_chapter)
+
+            # 刪除被使用者在前端按 "X" 移除的舊集數
+            for c_id_str, existing_c in existing_chapter_map.items():
+                if c_id_str not in submitted_chapter_ids:
+                    session.delete(existing_c)
+
+    # 刪除被使用者在前端移除的舊文章
+    for a_id_str, existing_a in existing_article_map.items():
+        if a_id_str not in submitted_article_ids:
+            session.delete(existing_a)
+
+    # --- 4. 統一儲存所有變更 ---
+    session.commit()
     
     return RedirectResponse("/admin/edit?updated=true", status_code=303)
 
-# 登出 (GET)
+# 5. 登出 (GET)
 @router.get("/admin/logout")
 def admin_logout():
     response = RedirectResponse("/admin", status_code=303)
     response.delete_cookie(key=SESSION_COOKIE_NAME)
     return response
-
-# 🌟 提醒：記得將 articles.html 和 article_detail.html 放到 app/templates/ 
-#    並且你的 article_router 要使用 load_data() 來獲取最新的文章數據！

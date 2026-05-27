@@ -1,94 +1,340 @@
-    <!DOCTYPE html>
-    <html lang="zh-Hant">
-    <head>
-        <meta charset="UTF-8">
-        <title>Two Player Chess Game</title>
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>Geister 殘局解謎 | 題庫連線版</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: #e2e8f0; min-height: 100vh;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
 
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        .game-container {
+            background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px;
+            padding: 40px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            display: flex; gap: 60px; align-items: flex-start;
+        }
+
+        .sidebar { display: flex; flex-direction: column; gap: 20px; width: 280px; }
+        h2 { font-size: 24px; font-weight: 700; color: #f8fafc; }
+        .tagline { font-size: 13px; color: #94a3b8; line-height: 1.6; }
         
-        <link rel="stylesheet" href="static/chessboard.min.css">
-        <script src="static/chessboard.min.js"></script>
+        .control-group { display: flex; flex-direction: column; gap: 8px; }
+        label { font-size: 11px; color: #94a3b8; font-weight: 600; }
+        
+        select, button { padding: 12px; border-radius: 8px; font-size: 15px; cursor: pointer; transition: 0.2s; }
+        select { background: #334155; color: white; border: 1px solid #475569; }
+        button.action-btn { background: #3b82f6; color: white; border: none; font-weight: bold; }
+        button.action-btn:hover { background: #2563eb; transform: translateY(-1px); }
 
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+        .status-box { background: rgba(0,0,0,0.25); padding: 15px; border-radius: 8px; border-left: 4px solid #3b82f6; }
+        #puzzleTitle { font-size: 15px; font-weight: bold; margin-bottom: 5px; color: #f8fafc; }
+        #statusMessage { font-size: 13px; color: #cbd5e1; line-height: 1.5; }
 
-        <style>
-            #board { width: 480px; margin: 20px auto; }
-            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-            .center-text { text-align: center; }
-            .status-bar { 
-                font-size: 1.2em; 
-                margin-top: 20px; 
-                font-weight: bold;
+        #solutionBox { display: none; padding: 12px; background: rgba(255,255,255,0.06); border-radius: 8px; font-size: 13px; color: #a3e635; line-height: 1.5;}
+
+        /* 星星評分面板樣式 */
+        .rating-box {
+            display: none; background: rgba(251, 191, 36, 0.1); padding: 15px; 
+            border-radius: 8px; border-left: 4px solid #fbbf24; text-align: center;
+        }
+        .rating-box h4 { font-size: 14px; color: #fbbf24; margin-bottom: 10px; }
+        .stars { display: flex; justify-content: center; gap: 8px; font-size: 28px; cursor: pointer; }
+        .star { color: #475569; transition: color 0.1s, transform 0.1s; }
+        .star:hover { transform: scale(1.15); }
+        .star.active { color: #fbbf24; text-shadow: 0 0 8px rgba(251, 191, 36, 0.5); }
+
+        /* 右側：戰略棋盤與外圍傳送門 */
+        .board-wrapper {
+            position: relative;
+            background: #0f172a; padding: 12px; border-radius: 16px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.6); border: 1px solid #334155;
+        }
+        .board { 
+            display: grid; grid-template-columns: repeat(6, 75px); grid-template-rows: repeat(6, 75px);
+            gap: 3px; background-color: #1e293b;
+        }
+        .cell { 
+            background-color: #334155; display: flex; align-items: center; justify-content: center; 
+            cursor: pointer; transition: 0.15s;
+        }
+        .cell:hover { background-color: #475569; }
+        .selected { background-color: #3b82f6 !important; box-shadow: inset 0 0 15px rgba(0,0,0,0.4); }
+
+        /* 外部脫逃傳送門設計 */
+        .escape-portal {
+            position: absolute; width: 60px; height: 75px; 
+            background: rgba(59, 130, 246, 0.1); border: 2px dashed #3b82f6; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; color: #3b82f6;
+            cursor: pointer; transition: all 0.3s; opacity: 0.4;
+        }
+        .escape-portal:hover { background: rgba(59, 130, 246, 0.4); opacity: 1; text-shadow: 0 0 5px white; }
+        
+        .portal-tl { left: -75px; top: 12px; }
+        .portal-tr { right: -75px; top: 12px; }
+        .portal-bl { left: -75px; bottom: 12px; }
+        .portal-br { right: -75px; bottom: 12px; }
+
+        /* 幽靈造型 */
+        .ghost {
+            width: 46px; height: 50px; background: linear-gradient(to bottom, #f8fafc, #cbd5e1);
+            border-radius: 25px 25px 5px 5px; position: relative; display: flex; justify-content: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+            animation: floatAnimation 3s ease-in-out infinite;
+        }
+        @keyframes floatAnimation {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-4px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .ghost::before, .ghost::after {
+            content: ''; position: absolute; top: 16px; width: 6px; height: 8px; background: #1e293b; border-radius: 50%;
+        }
+        .ghost::before { left: 13px; } .ghost::after { right: 13px; }
+        .player-red .ghost { border-bottom: 4px solid #ef4444; }
+        .player-blue .ghost { border-bottom: 4px solid #3b82f6; }
+
+        .dot { width: 14px; height: 14px; border-radius: 50%; position: absolute; top: -4px; right: -4px; border: 2px solid #fff; z-index: 10;}
+        .good-dot { background-color: #3b82f6; box-shadow: 0 0 10px #3b82f6; }
+        .bad-dot { background-color: #ef4444; box-shadow: 0 0 10px #ef4444; }
+        .unknown-dot { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <div class="sidebar">
+        <div>
+            <h2>Geister 殘局解謎</h2>
+            <p class="tagline">題目將自動從資料庫載入。若你走對了，AI 會自動回應；最後一步請從角落脫逃！</p>
+        </div>
+        
+        <div class="control-group">
+            <label>選擇題庫關卡</label>
+            <select id="puzzleSelect"></select>
+            <button class="action-btn" onclick="loadSelectedPuzzle()">▶️ 載入此殘局</button>
+        </div>
+
+        <div class="status-box">
+            <div id="puzzleTitle">系統連線中...</div>
+            <div id="statusMessage">正在嘗試與題庫連線。</div>
+        </div>
+
+        <button class="action-btn" style="background:#475569;" onclick="showSolution()">💡 查看標準解答</button>
+        <div id="solutionBox"></div>
+
+        <div class="rating-box" id="ratingBox">
+            <h4>這道謎題設計得好嗎？</h4>
+            <div class="stars">
+                <span class="star" data-value="1" onclick="submitRating(1)">★</span>
+                <span class="star" data-value="2" onclick="submitRating(2)">★</span>
+                <span class="star" data-value="3" onclick="submitRating(3)">★</span>
+                <span class="star" data-value="4" onclick="submitRating(4)">★</span>
+                <span class="star" data-value="5" onclick="submitRating(5)">★</span>
+            </div>
+            <p id="ratingThanks" style="display:none; font-size:12px; color:#a3e635; margin-top:10px;">感謝評分！數據已回傳後台。</p>
+        </div>
+    </div>
+
+    <div class="board-wrapper">
+        <div class="escape-portal portal-tl" onclick="handleCellClick(0, -1, this)">🏃 脫逃</div>
+        <div class="escape-portal portal-tr" onclick="handleCellClick(0, 6, this)">🏃 脫逃</div>
+        <div class="escape-portal portal-bl" onclick="handleCellClick(5, -1, this)">🏃 脫逃</div>
+        <div class="escape-portal portal-br" onclick="handleCellClick(5, 6, this)">🏃 脫逃</div>
+
+        <div class="board" id="chessBoard"></div>
+    </div>
+</div>
+
+<script>
+    let selectedCell = null;
+    let currentPuzzleId = null;
+
+    // === 1. 網頁啟動時，向後端要所有題庫 ===
+    async function initPuzzles() {
+        try {
+            const response = await fetch("/api/chess/puzzles");
+            const data = await response.json();
+            
+            const selectBox = document.getElementById("puzzleSelect");
+            selectBox.innerHTML = ""; 
+
+            if (!data.puzzles || data.puzzles.length === 0) {
+                selectBox.innerHTML = `<option value="">尚無題庫，等待 C++ 傳送...</option>`;
+                document.getElementById("puzzleTitle").innerText = "題庫為空";
+                document.getElementById("statusMessage").innerText = "請先透過 API 上傳謎題。";
+                return;
             }
-        </style>
-    </head>
-    <body>
-    <h2 class="center-text">西洋棋</h2>
-    <p id="gameStatus" class="center-text status-bar">目前回合：白方</p>
-    <div id="board"></div>
-    <p class="center-text"><button onclick="resetGame()">重新開始遊戲</button></p>
 
-    <script>
-// 初始化棋盤邏輯
-let game = new Chess();
-let board = null;
+            // 把資料庫的題目塞進下拉選單
+            data.puzzles.forEach(p => {
+                const opt = document.createElement("option");
+                opt.value = p.id;
+                opt.innerText = p.title;
+                selectBox.appendChild(opt);
+            });
 
-// 更新回合狀態
-function updateStatus() {
-    let moveColor = (game.turn() === 'w') ? '白方' : '黑方';
-    let status = '';
-
-    if (game.in_checkmate()) {
-        status = '遊戲結束，' + moveColor + '被將死。';
-    } else if (game.in_draw()) {
-        status = '遊戲結束，平局。';
-    } else {
-        status = '目前回合：' + moveColor;
-        if (game.in_check()) status += '（被將軍！）';
+            // 預設自動載入第一關
+            loadSelectedPuzzle();
+        } catch (error) {
+            console.error("題庫連線失敗:", error);
+            document.getElementById("puzzleTitle").innerText = "連線失敗";
+            document.getElementById("statusMessage").innerText = "無法連接到資料庫。";
+        }
     }
 
-    document.getElementById('gameStatus').innerText = status;
-}
+    // === 2. 載入選擇的關卡 ===
+    async function loadSelectedPuzzle() {
+        const selectBox = document.getElementById("puzzleSelect");
+        if (!selectBox.value) return; // 如果沒題目就跳出
 
-// 拖棋子檢查是否合法
-function onDragStart(source, piece, position, orientation) {
-    if (game.game_over()) return false;
-    if ((game.turn() === 'w' && piece.search(/^b/) !== -1) ||
-        (game.turn() === 'b' && piece.search(/^w/) !== -1)) return false;
-}
+        currentPuzzleId = selectBox.value;
+        document.getElementById("solutionBox").style.display = "none";
+        document.getElementById("ratingBox").style.display = "none";
+        document.getElementById("ratingThanks").style.display = "none";
+        resetStars();
 
-// 放下棋子
-function onDrop(source, target) {
-    let move = game.move({ from: source, to: target, promotion: 'q' });
-    if (move === null) return 'snapback';
-    updateStatus();
-}
+        await fetch(`/api/chess/load_puzzle/${currentPuzzleId}`, { method: "POST" });
+        fetchBoard();
+    }
 
-// 移動動畫結束後更新棋盤
-function onSnapEnd() {
-    board.position(game.fen());
-}
+    // === 3. 獲取並渲染棋盤 ===
+    async function fetchBoard() {
+        const response = await fetch(`/api/chess/board?player=blue`);
+        const data = await response.json();
+        
+        document.getElementById("puzzleTitle").innerText = data.puzzle_title;
+        const statusMsg = document.getElementById("statusMessage");
+        statusMsg.innerText = data.message;
+        
+        // 通關或失敗時，顯示評分星星
+        if (data.status === "solved") {
+            statusMsg.style.color = "#a3e635";
+            document.getElementById("ratingBox").style.display = "block";
+        } else if (data.status === "failed") {
+            statusMsg.style.color = "#ef4444";
+            document.getElementById("ratingBox").style.display = "block";
+        } else {
+            statusMsg.style.color = "#cbd5e1";
+        }
+        
+        const boardContainer = document.getElementById("chessBoard");
+        boardContainer.innerHTML = ""; 
 
-// Reset 遊戲
-function resetGame() {
-    game.reset();
-    board.start();
-    updateStatus();
-}
+        for (let r = 0; r < 6; r++) {
+            for (let c = 0; c < 6; c++) {
+                const piece = data.board[r][c];
+                const cell = document.createElement("div");
+                cell.className = "cell";
+                cell.dataset.row = r;
+                cell.dataset.col = c;
 
-// 初始化棋盤
-board = Chessboard('board', {
-    draggable: true,
-    position: 'start',
-    onDragStart: onDragStart,
-    onDrop: onDrop,
-    onSnapEnd: onSnapEnd,
-    pieceTheme: 'static/img/chesspieces/wikipedia/{piece}.png'
-});
+                if (piece) {
+                    cell.classList.add(`player-${piece.player}`);
+                    const ghostDiv = document.createElement("div");
+                    ghostDiv.className = "ghost";
+                    
+                    const dot = document.createElement("div");
+                    dot.className = "dot";
+                    if (piece.type === "good") dot.classList.add("good-dot");
+                    else if (piece.type === "bad") dot.classList.add("bad-dot");
+                    else dot.classList.add("unknown-dot");
+                    
+                    ghostDiv.appendChild(dot);
+                    cell.appendChild(ghostDiv);
+                }
 
-// 初始化狀態
-updateStatus();
+                cell.onclick = () => handleCellClick(r, c, cell);
+                boardContainer.appendChild(cell);
+            }
+        }
 
+        // 敵方自動走棋邏輯
+        if (data.status === 'playing' && data.turn === 'red') {
+            setTimeout(async () => {
+                await fetch("/api/chess/auto_move", { method: "POST" });
+                fetchBoard(); 
+            }, 800);
+        }
+    }
+
+    // === 4. 點擊走棋 ===
+    async function handleCellClick(row, col, cellElement) {
+        if (selectedCell === null) {
+            selectedCell = { row, col };
+            cellElement.classList.add("selected");
+        } else {
+            const moveData = {
+                from_row: selectedCell.row,
+                from_col: selectedCell.col,
+                to_row: row,
+                to_col: col,
+                player: "blue"
+            };
+
+            document.querySelectorAll('.cell, .escape-portal').forEach(c => c.classList.remove('selected'));
+            selectedCell = null;
+
+            const response = await fetch("/api/chess/move", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(moveData)
+            });
+
+            if (!response.ok) {
+                const errResult = await response.json();
+                document.getElementById("statusMessage").innerText = "⚠️ " + errResult.message;
+                document.getElementById("statusMessage").style.color = "#ef4444";
+                return;
+            }
+            
+            fetchBoard(); 
+        }
+    }
+
+    // === 5. 顯示解答 ===
+    async function showSolution() {
+        if (!currentPuzzleId) return;
+        const response = await fetch(`/api/chess/solution/${currentPuzzleId}`);
+        const data = await response.json();
+        const solBox = document.getElementById("solutionBox");
+        solBox.style.display = "block";
+        if (data.solution === "no solution") {
+            solBox.innerHTML = "<strong>殘局分析：</strong><br><span style='color:#ef4444; font-weight:bold;'>此題在數學模型中證實無解。</span>";
+        } else {
+            solBox.innerHTML = "<strong>AI 推薦最優解法：</strong><br>" + data.solution.split("   ").join("<br>");
+        }
+    }
+
+    // === 6. 評分相關機制 ===
+    function resetStars() {
+        document.querySelectorAll('.star').forEach(s => s.classList.remove('active'));
+    }
+
+    async function submitRating(score) {
+        const stars = document.querySelectorAll('.star');
+        stars.forEach((s, idx) => {
+            if (idx < score) s.classList.add('active');
+            else s.classList.remove('active');
+        });
+
+        await fetch("/api/chess/rate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ puzzle_id: currentPuzzleId.toString(), rating: score })
+        });
+
+        document.getElementById("ratingThanks").style.display = "block";
+    }
+
+    // === 啟動點：抓取資料庫題庫 ===
+    initPuzzles();
 </script>
+
 </body>
 </html>
