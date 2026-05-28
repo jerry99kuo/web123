@@ -28,4 +28,4 @@ async def home(request: Request, session: Session = Depends(get_session)):
     }
     
     # 把 request、你的名字、以及打包好的 data 傳給 home.html 去渲染畫面
-    return templates.TemplateResponse("home.html", {"request": request, "name": "Jerry Kuo", "data": data})
+    return templates.TemplateResponse(request=request, name="home.html", context={"request": request, "name": "Jerry Kuo", "data": data})
