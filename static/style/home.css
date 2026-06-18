@@ -1,6 +1,6 @@
 /* --- 1. 全局與變數設定 --- */
 :root {
-  --primary-color: #0d6cf0ff;
+  --primary-color: rgb(97, 100, 104);
   --secondary-color: rgb(17, 163, 102);
   --accent-color: #1a2a6c;
   --text-dark: #2c3e50;
@@ -16,7 +16,7 @@ body {
   margin: 0;
   padding: 0;
   font-family: var(--font-family);
-  background: linear-gradient(135deg, #4ac7ddff, #22bed3ff);
+  background: linear-gradient(135deg, rgb(203, 227, 231), #22bed3ff);
   color: var(--text-dark);
   overflow-x: hidden;
 }

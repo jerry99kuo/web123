@@ -11,8 +11,13 @@ templates = Jinja2Templates(directory="app/templates")
 @router.get("/portfolio", response_class=HTMLResponse)
 async def portfolio(request: Request, session: Session = Depends(get_session)):
     
-    # 【資料庫查詢】去 Portfolio 資料表把所有的作品清單都撈出來
-    projects = session.exec(select(Portfolio)).all()
+    # 【資料庫查詢】撈出所有作品，並透過 order_by 讓「最新建立的」排在最上面
+    statement = select(Portfolio).order_by(Portfolio.id.desc())
+    projects = session.exec(statement).all()
     
     # 把 projects 傳給 portfolio.html，讓它可以用 {% for project in projects %} 跑迴圈印出畫面
-    return templates.TemplateResponse("portfolio.html", {"request": request, "projects": projects, "name": "Jerry Kuo"})
+    return templates.TemplateResponse(
+        request=request, 
+        name="portfolio.html", 
+        context={"request": request, "projects": projects, "name": "Jerry Kuo"}
+    )

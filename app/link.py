@@ -17,4 +17,4 @@ async def contact(request: Request, session: Session = Depends(get_session)):
     # 包裝在字典裡，對應舊版 JSON 的 {"links": [...]} 結構
     data = {"links": links_from_db}
     
-    return templates.TemplateResponse("link.html", {"request": request, "name": "Jerry Kuo", "data": data})
+    return templates.TemplateResponse(request=request, name = "link.html", context = {"request": request, "name": "Jerry Kuo", "data": data})

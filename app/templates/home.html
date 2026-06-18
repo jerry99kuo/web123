@@ -1,84 +1,317 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>郭兆軒的個人網站</title>
-    <meta
-      name="description"
-      content="歡迎來到郭兆軒的個人網站，這裡展示我的作品、聯絡方式與更多資訊。"
-    />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>郭兆軒 | Developer Portfolio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
-    <link rel="icon" href="static/images/jk.jpg" type="image/x-icon" />
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
-    />
+    <style>
+        /* --- 核心變數設計 (Vercel/Linear 暗黑風格) --- */
+        :root {
+            --bg-base: #0a0a0a;
+            --bg-surface: #171717;
+            --bg-hover: #262626;
+            --text-primary: #ededed;
+            --text-secondary: #a1a1aa;
+            --accent-color: #38bdf8; 
+            --border-color: rgba(255, 255, 255, 0.1);
+            --font-sans: 'Inter', -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap"
-      rel="stylesheet"
-    />
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    <link rel="stylesheet" href="static/style/home.css" />
-  </head>
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
 
-  <body>
-    <section class="hero" id="home">
-      <div class="container-box">
-        <img
-          src="static/images/notme.jpg"
-          alt="Jerry Kuo"
-          class="profile-img"
-        />
-        <h1>郭兆軒 (Jerry Kuo)</h1>
-        <p>{{ data.home.title }} 歡迎來到我的網站。</p>
+        /* --- 佈局容器 --- */
+        .container {
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 80px 24px;
+        }
 
-        <div class="d-grid gap-3 btn-container">
-          <a href="/portfolio" class="btn btn-custom-1 custom-btn"
-            ><i class="bi bi-briefcase-fill"></i> 我的作品</a
-          >
-          <a href="/contact" class="btn btn-custom-2 custom-btn"
-            ><i class="bi bi-envelope-fill"></i> 聯絡我</a
-          >
-          <a href="/link" class="btn btn-custom-3 custom-btn"
-            ><i class="bi bi-link-45deg"></i> 相關連結</a
-          >
-        </div>
-      </div>
-      <a href="#articles" class="scroll-down">
-        <i class="bi bi-mouse2"></i>
-      </a>
-    </section>
+        /* --- 頂部個人簡介 (Hero) --- */
+        .hero { margin-bottom: 60px; }
+        
+        .hero-header {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
 
-    <section id="articles" class="py-5" style="background-color: #f0f3f5">
-      <div class="container text-center">
-        <h2 class="mb-4">📚 我的知識文章</h2>
-        <p class="lead mb-4" style="color: var(--text-light)">
-          這裡收錄了我在軟體開發、網站技術和生活思考上的心得與筆記。
-        </p>
+        .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 1px solid var(--border-color);
+            object-fit: cover;
+        }
 
-        <a
-          href="/articles"
-          class="btn btn-lg btn-custom-1 custom-btn mx-auto"
-          style="max-width: 300px; margin-top: 20px"
-        >
-          <i class="bi bi-book-half"></i> 瀏覽所有文章與集數
-        </a>
-      </div>
-    </section>
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -0.05em;
+            margin-bottom: 4px;
+        }
 
-    <footer>
-      <p>持續更新網站</p>
-      <p>&copy; 2025 郭兆軒 (Jerry Kuo). All Rights Reserved.</p>
-    </footer>
+        .role {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  </body>
+        .bio {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            max-width: 600px;
+            margin-bottom: 24px;
+        }
+
+        /* --- 標籤 --- */
+        .hobby-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 40px;
+        }
+
+        .tag {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--accent-color);
+            background: rgba(56, 189, 248, 0.1);
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid rgba(56, 189, 248, 0.2);
+        }
+
+        /* --- 按鈕列 --- */
+        .action-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: var(--bg-surface);
+            color: var(--text-primary);
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background: var(--bg-hover);
+            border-color: #52525b;
+        }
+
+        .btn.primary {
+            background: var(--text-primary);
+            color: var(--bg-base);
+            border: none;
+        }
+
+        .btn.primary:hover {
+            background: #ffffff;
+            transform: translateY(-1px);
+        }
+
+        /* --- 區塊標題 --- */
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .section-title::after {
+            content: '';
+            height: 1px;
+            flex-grow: 1;
+            background: var(--border-color);
+        }
+
+        /* --- 專案/文章卡片 --- */
+        .grid-section {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 60px;
+        }
+
+        .card {
+            display: block;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            border-color: rgba(56, 189, 248, 0.5);
+            background: #1a1a1a;
+            transform: translateY(-2px);
+        }
+
+        .card h3 {
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .card-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 16px;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: #71717a;
+        }
+
+        /* --- 頁尾 --- */
+        footer {
+            margin-top: 80px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header class="hero">
+            <div class="hero-header">
+                <img src="static/images/me.jpg" alt="Jerry Kuo" class="avatar" onerror="this.src='https://via.placeholder.com/80'">
+                <div>
+                    <h1>郭兆軒</h1>
+                    <div class="role">大二生</div>
+                </div>
+            </div>
+            
+            <p class="bio">
+                {{ data.home.title if data else '' }} 歡迎來到我的網站
+            </p>
+
+            <div class="hobby-stack">
+                <span class="tag">吃飯</span>
+                <span class="tag">跑步</span>
+                <span class="tag">西洋棋</span>
+                <span class="tag">CS</span>
+            </div>
+
+            <div class="action-links">
+                <a href="/portfolio" class="btn primary"><i class="bi bi-briefcase-fill"></i> Profolio</a>
+                <a href="/contact" class="btn"><i class="bi bi-envelope-fill"></i> 聯絡我</a>
+                <a href="/link" class="btn"><i class="bi bi-link-45deg"></i> 相關連結</a>
+                <a href="/articles" class="btn"><i class="bi bi-book"></i> 文章</a>
+            </div>
+        </header>
+
+        <section id="achievements">
+            <h2 class="section-title">🏆 Life & Work</h2>
+            <div class="grid-section">
+                
+                <!-- 動態抓取前 3 筆紀錄 (需確保後端有傳遞 portfolios 變數) -->
+                {% if data and data.portfolios %}
+                    {% for item in data.portfolios[:3] %}
+                    <a href="{{ item.link or '/portfolio' }}" class="card">
+                        <h3><i class="bi bi-star-fill" style="color: #fbbf24; font-size: 1.1rem;"></i> {{ item.name }}</h3>
+                        <p>{{ item.desc }}</p>
+                        <div class="card-meta">
+                            <span>查看詳情 <i class="bi bi-arrow-right-short"></i></span>
+                        </div>
+                    </a>
+                    {% endfor %}
+                {% else %}
+                    <!-- 預設展示卡片 (當資料庫為空或尚未傳遞變數時顯示) -->
+                    <a href="/portfolio" class="card">
+                        <h3><i class="bi bi-star-fill" style="color: #fbbf24; font-size: 1.1rem;"></i> 2025 台北馬拉松 (半程馬拉松)</h3>
+                        <p>順利完賽 21KM 賽事，持續朝向 Zone 2 跑步訓練目標邁進，突破配速極限。</p>
+                        <div class="card-meta">
+                            <span>Lifestyle & Health</span>
+                        </div>
+                    </a>
+                    
+                    <a href="/portfolio" class="card">
+                        <h3><i class="bi bi-star-fill" style="color: #fbbf24; font-size: 1.1rem;"></i> 西洋棋 Lichess 戰績突破</h3>
+                        <p>Puzzle Rating 成功達到 1600 分，持續備戰線下比賽，朝 2100-2400 目標挺進。</p>
+                        <div class="card-meta">
+                            <span>Chess Records</span>
+                        </div>
+                    </a>
+
+                    <a href="/portfolio" class="card">
+                        <h3><i class="bi bi-star-fill" style="color: #fbbf24; font-size: 1.1rem;"></i> JobHub 系統開發</h3>
+                        <p>基於 n8n 打造的自動化職缺整合系統，結合 AI 應用實現高效的資訊處理。</p>
+                        <div class="card-meta">
+                            <span>#n8n #Automation</span>
+                        </div>
+                    </a>
+                {% endif %}
+                
+            </div>
+            
+            <!-- 增加一個前往完整頁面的按鈕 -->
+            <div style="text-align: center; margin-top: -20px; margin-bottom: 60px;">
+                <a href="/portfolio" class="btn" style="width: 100%; max-width: 300px; justify-content: center;">
+                    查看完整 <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </section>
+
+        <section id="articles">
+            <h2 class="section-title">📚 我的文章</h2>
+            
+            <p style="color: var(--text-secondary); margin-bottom: 24px;">
+                這裡收錄了我的筆記。
+            </p>
+
+            <a href="/articles" class="btn primary" style="width: 100%; max-width: 300px;">
+                <i class="bi bi-book-half"></i> 瀏覽所有文章與集數
+            </a>
+        </section>
+
+        <footer>
+            <div>持續更新網站</div>
+            <div>&copy; 2026 郭兆軒. All Rights Reserved.</div>
+        </footer>
+    </div>
+
+</body>
 </html>

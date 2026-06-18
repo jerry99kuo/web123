@@ -1,98 +1,180 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-Hant">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ name }} - Contact</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ name | default('Jerry Kuo') }} - Contact</title>
 
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 引入與首頁一致的字體與圖示 -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+    />
 
     <style>
-        body {
-            padding: 20px;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fa;
-        }
+      :root {
+        /* 核心暗黑風變數 */
+        --bg-base: #0a0a0a;
+        --bg-surface: #171717;
+        --bg-hover: #262626;
+        --text-primary: #ededed;
+        --text-secondary: #a1a1aa;
+        --accent-color: #38bdf8;
+        --border-color: rgba(255, 255, 255, 0.1);
+        --font-sans: "Inter", -apple-system, sans-serif;
+        --font-mono: "JetBrains Mono", monospace;
+      }
 
-        h1 {
-            font-weight: 600;
-            margin-bottom: 20px;
-            color: #333;
-        }
+      body {
+        background-color: var(--bg-base);
+        color: var(--text-primary);
+        font-family: var(--font-sans);
+        line-height: 1.6;
+        margin: 0;
+        -webkit-font-smoothing: antialiased;
+      }
 
-        .contact-info {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 80px 24px;
+      }
 
-        p {
-            margin: 10px 0;
-            font-size: 18px;
-        }
+      h1 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 10px;
+        letter-spacing: -0.05em;
+        text-align: center;
+      }
 
-        .btn-custom {
-            margin-top: 10px;
-            padding: 10px 20px;
-            border-radius: 25px;
-            font-weight: 500;
-            color: #fff;
-            transition: all 0.3s ease;
-            text-decoration: none;
-        }
+      .subtitle {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        text-align: center;
+        margin-bottom: 40px;
+      }
 
-        .btn-home {
-            background-color: #0871fcff;
-        }
+      /* 讓卡片內部的內容垂直排列 */
+      .contact-card {
+        display: flex;
+        flex-direction: column; /* 垂直排列 */
+        gap: 20px; /* 兩行之間的間距 */
+        /* ... 其餘你原本的樣式 ... */
+      }
 
-        .btn-home:hover {
-            background-color: #ee0c0cff;
-        }
+      /* 每一行內部維持水平排列 */
+      .contact-row {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
 
-        .btn-portfolio {
-            background-color: #03fc41ff;
-        }
+      .contact-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 50px;
+        height: 50px;
+        background: rgba(56, 189, 248, 0.1);
+        color: var(--accent-color);
+        border-radius: 50%;
+        font-size: 1.5rem;
+        transition: all 0.2s ease;
+      }
 
-        .btn-portfolio:hover {
-            background-color: #ee0c0cff;
-        }
+      .contact-info {
+        display: flex;
+        flex-direction: column;
+      }
 
-        .btn-links {
-            background-color: #ca12a2ff;
-        }
+      .contact-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: 4px;
+      }
 
-        .btn-links:hover {
-            background-color: #ee0c0cff;
-        }
+      .contact-value {
+        color: var(--text-primary);
+        font-size: 1.15rem;
+        font-weight: 600;
+        font-family: var(--font-mono);
+      }
 
-        @media (max-width: 600px) {
-            .btn-custom {
-                width: 100%;
-                text-align: center;
-            }
-        }
+      /* --- 底部導覽按鈕 --- */
+      .nav-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 16px;
+        padding-top: 40px;
+        margin-top: 30px;
+        border-top: 1px solid var(--border-color);
+      }
+
+      .btn-custom {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        background: var(--bg-surface);
+        color: var(--text-primary);
+        text-decoration: none;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        font-weight: 500;
+        transition: 0.2s;
+      }
+
+      .btn-custom:hover {
+        background: var(--bg-hover);
+        border-color: #52525b;
+        color: white;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <h1>Contact {{ name }}</h1>
-        <div class="contact-info">
-            <p>Email: jerrykuo@gmail.com</p>
-            <p>Phone: 123-456-7890</p>
+      <h1>📬 聯絡我</h1>
+      <p class="subtitle">Get in touch</p>
+
+      <a class="contact-card">
+        <!-- 第一行：Email -->
+        <div class="contact-row">
+          <div class="contact-icon"><i class="bi bi-envelope-fill"></i></div>
+          <div class="contact-info">
+            <span class="contact-label">Email Address</span>
+            <span class="contact-value">{{ data.contact.email }}</span>
+          </div>
         </div>
 
-        <div class="d-flex gap-2 flex-wrap">
-            <a href="/" class="btn-custom btn-home">Home</a>
-            <a href="/portfolio" class="btn-custom btn-portfolio">Portfolio</a>
-            <a href="/link" class="btn-custom btn-links">Link</a>
+        <!-- 第二行：電話 -->
+        <div class="contact-row">
+          <div class="contact-icon"><i class="bi bi-telephone-fill"></i></div>
+          <div class="contact-info">
+            <span class="contact-label">Phone Number</span>
+            <span class="contact-value">{{ data.contact.phone }}</span>
+          </div>
         </div>
+      </a>
+
+      <!-- 底部導覽列 -->
+      <div class="nav-actions">
+        <a href="/" class="btn-custom"><i class="bi bi-house"></i> 首頁</a>
+        <a href="/portfolio" class="btn-custom"
+          ><i class="bi bi-trophy-fill"></i> 里程碑</a
+        >
+        <a href="/articles" class="btn-custom"
+          ><i class="bi bi-book"></i> 文章</a
+        >
+        <a href="/link" class="btn-custom"
+          ><i class="bi bi-link-45deg"></i> 相關連結</a
+        >
+      </div>
     </div>
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
+  </body>
 </html>
-
