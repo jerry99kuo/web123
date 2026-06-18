@@ -25,7 +25,7 @@ async def articles_list(request: Request, session: Session = Depends(get_session
         },
         "articles": articles
     }
-    return templates.TemplateResponse("articles.html", {"request": request, "data": data})
+    return templates.TemplateResponse(request = request, name = "articles.html", context = {"request": request, "data": data})
 
 # --- 單篇文章詳情頁面 ---
 @router.get("/article/{article_id}")
@@ -42,4 +42,4 @@ async def article_detail(request: Request, article_id: int, session: Session = D
     config = session.exec(select(SiteConfig)).first()
     data = {"home": {"title": config.home_title if config else ""}}
     
-    return templates.TemplateResponse("article_detail.html", {"request": request, "article": article, "data": data})
+    return templates.TemplateResponse(request=request, name="article_detail.html", context={"request": request, "article": article, "data": data})

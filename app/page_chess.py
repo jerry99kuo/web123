@@ -115,7 +115,7 @@ async def get_solution(puzzle_id: int, session: Session = Depends(get_session)):
 # (其餘原有的頁面渲染、移動、自動下棋、評分 API 保持不變)
 @router.get("/chess", response_class=HTMLResponse)
 async def get_chess_page(request: Request):
-    return templates.TemplateResponse("chess.html", {"request": request})
+    return templates.TemplateResponse(request = request, name = "chess.html", context={"request": request})
 
 @router.get("/api/chess/board")
 async def get_board(player: str):

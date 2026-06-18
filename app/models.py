@@ -56,3 +56,4 @@ class Puzzle(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     board_str: str 
     solution: str   
+    

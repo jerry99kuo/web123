@@ -21,4 +21,4 @@ async def contact(request: Request, session: Session = Depends(get_session)):
             "phone": config.phone_number if config else "目前無電話"
         }
     }
-    return templates.TemplateResponse("contact.html", {"request": request, "name": "Jerry Kuo", "data": data})
+    return templates.TemplateResponse(request=request, name="contact.html", context={"request": request, "name": "Jerry Kuo", "data": data})
