@@ -34,6 +34,7 @@ def parse_board_string(board_str: str):
         elif char == 'R': board[r][c] = {"player": "blue", "type": "bad"}
         elif char == 'b': board[r][c] = {"player": "red", "type": "good"}
         elif char == 'r': board[r][c] = {"player": "red", "type": "bad"}
+        elif char == 'u': board[r][c] = {"player": "red", "type": "unknown"}
     return board
 
 def parse_solution_steps(solution_str: str):

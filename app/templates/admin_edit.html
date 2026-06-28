@@ -1,470 +1,571 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>網站內容編輯 - 後台管理</title>
-  
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
-  <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-
-  <style>
-    .page-header { display: flex; justify-content: space-between; align-items: center; }
-    .success-message { background-color: var(--pico-color-green-100); border: 1px solid var(--pico-color-green-200); color: var(--pico-color-green-700); padding: var(--pico-spacing); border-radius: var(--pico-border-radius); margin-bottom: var(--pico-spacing); }
-    .link-row { display: grid; grid-template-columns: 1fr 1fr auto; grid-gap: var(--pico-spacing); align-items: flex-end; margin-bottom: var(--pico-spacing); }
-    .link-row label { margin-bottom: 0; }
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>網站內容編輯 - 後台管理</title>
     
-    /* 大分類折疊面板 */
-    .main-section { background-color: var(--pico-background-color); border: 2px solid var(--pico-form-element-border-color); border-radius: var(--pico-border-radius); margin-bottom: 1.5rem; padding: 0; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-    .main-section > summary { font-size: 1.25rem; font-weight: 700; margin: 0; padding: 15px 20px; border-radius: var(--pico-border-radius); transition: background-color 0.2s; }
-    .main-section > summary:hover { background-color: var(--pico-form-element-active-background-color); }
-    .main-section[open] > summary { border-bottom-left-radius: 0; border-bottom-right-radius: 0; border-bottom: 2px solid var(--pico-form-element-border-color); margin-bottom: var(--pico-spacing); }
-    .main-section-body { padding: 0 20px 20px 20px; }
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
-    /* 次層級（文章、作品集）折疊面板 */
-    .entry-card { background-color: var(--pico-background-color); border: 1px solid var(--pico-form-element-border-color); border-radius: var(--pico-border-radius); margin-bottom: 1.5rem; padding: 0; }
-    .entry-card > summary { font-weight: 600; font-size: 1.1rem; margin: 0; padding: 15px 20px; border-radius: var(--pico-border-radius); transition: background-color 0.2s; }
-    .entry-card > summary:hover { background-color: var(--pico-form-element-active-background-color); }
-    .entry-card[open] > summary { border-bottom-left-radius: 0; border-bottom-right-radius: 0; border-bottom: 1px solid var(--pico-form-element-border-color); margin-bottom: var(--pico-spacing); }
-    .entry-card-body { padding: 0 20px 20px 20px; }
-    
-    .chapter-card { border-style: dashed; margin-bottom: 1rem; }
-    .chapter-card > summary { font-size: 1rem; }
-    
-    .danger-btn { color: #e53935 !important; border-color: #e53935 !important; background: transparent !important; }
-    .danger-btn:hover { background: #e53935 !important; color: #fff !important; }
-    
-    /* EasyMDE 編輯器深色模式 */
-    .editor-toolbar, .CodeMirror { background-color: var(--pico-form-element-background-color) !important; color: var(--pico-color) !important; border-color: var(--pico-form-element-border-color) !important; border-radius: var(--pico-border-radius); }
-    .CodeMirror-cursor { border-left: 1px solid var(--pico-color) !important; }
-    .editor-toolbar button, .editor-toolbar [type="button"] { background-color: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; border-radius: 4px !important; display: inline-block !important; width: 30px !important; height: 30px !important; text-align: center !important; line-height: 30px !important; }
-    .editor-toolbar button i.fa, .editor-toolbar [type="button"] i.fa { color: var(--pico-h1-color) !important; }
-    .editor-toolbar button:hover i.fa, .editor-toolbar [type="button"]:hover i.fa, .editor-toolbar button.active i.fa, .editor-toolbar [type="button"].active i.fa { color: var(--pico-primary) !important; }
-    .editor-preview, .editor-preview-side { background-color: var(--pico-background-color) !important; color: var(--pico-color) !important; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important; line-height: 1.8 !important; padding: var(--pico-spacing) !important; }
-    .editor-preview p, .editor-preview h1, .editor-preview h2, .editor-preview h3, .editor-preview h4, .editor-preview li, .editor-preview-side p, .editor-preview-side h1, .editor-preview-side h2, .editor-preview-side h3, .editor-preview-side h4, .editor-preview-side li { color: var(--pico-color) !important; margin-bottom: inherit; }
-    .editor-preview pre, .editor-preview-side pre { background-color: #282c34 !important; border: 1px solid #181a1f !important; border-radius: 6px !important; padding: 16px !important; overflow-x: auto !important; }
-    .editor-preview pre code, .editor-preview-side pre code { background-color: transparent !important; color: #abb2bf !important; padding: 0 !important; }
-    .editor-preview p code, .editor-preview li code, .editor-preview h1 code, .editor-preview h2 code, .editor-preview h3 code, .editor-preview-side p code, .editor-preview-side li code { background-color: rgba(135, 131, 120, 0.15) !important; color: #eb5757 !important; padding: 0.2em 0.4em !important; border-radius: 3px !important; font-size: 0.9em !important; }
-  </style>
-</head>
-<body>
-  <main class="container" style="max-width: 960px">
-    <article>
-      <header class="page-header">
-        <h2>網站內容編輯</h2>
-        <a href="/admin/logout" role="button" class="secondary">登出</a>
-      </header>
+    <style>
+      /* 全局字體 */
+      body, input, textarea, summary, .CodeMirror, .editor-preview, .editor-preview-side {
+        font-family: 'Inter', -apple-system, sans-serif !important;
+      }
 
-      {% if updated %}
-      <div class="success-message">資料已成功更新！</div>
-      {% endif %}
-
-      <form action="/admin/edit" method="post">
+      /* ==========================================================
+         🌞 亮色模式 (Light Mode)
+         ========================================================== */
+      @media (prefers-color-scheme: light) {
+        body, input, textarea, summary { color: #000000 !important; font-weight: 500 !important; }
+        h1, h2, h3, h4, h5, h6, label { color: #000000 !important; }
         
-        <!-- 區塊 1：首頁設定 -->
-        <details class="main-section">
-          <summary>🏠 首頁設定</summary>
-          <div class="main-section-body">
-            <div class="grid">
-              <div>
-                <label for="home_title">Title:</label>
-                <input type="text" id="home_title" name="home_title" value="{{ data.home.title }}" />
-              </div>
-              <div>
-                <label for="home_subtitle">Subtitle:</label>
-                <input type="text" id="home_subtitle" name="home_subtitle" value="{{ data.home.subtitle }}" />
-              </div>
-            </div>
-          </div>
-        </details>
+        /* 📝 左邊：編輯器 */
+        .CodeMirror { 
+          background-color: #ffffff !important; 
+          color: #000000 !important;
+          font-weight: 400 !important; 
+          line-height: 1.8 !important;
+          font-size: 16px !important;
+        }
+        .CodeMirror-cursor { border-left: 2px solid #000000 !important; }
 
-        <!-- 區塊 2：聯絡資訊 -->
-        <details class="main-section">
-          <summary>📞 聯絡資訊</summary>
-          <div class="main-section-body">
-            <div class="grid">
-              <div>
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" value="{{ data.contact.email }}" />
-              </div>
-              <div>
-                <label for="phone">Phone:</label>
-                <input type="tel" id="phone" name="phone" value="{{ data.contact.phone }}" />
-              </div>
-            </div>
-          </div>
-        </details>
+        /* 👁️ 右邊：預覽畫面 (同時修復眼睛與並排按鈕) */
+        .editor-preview, .editor-preview-side { 
+          background-color: #ffffff !important; 
+          color: #000000 !important; /* 純黑 */
+          font-weight: 400 !important; 
+          line-height: 1.8 !important;
+          font-size: 16px !important;
+          white-space: pre-wrap !important; /* 這裡負責保留空行 */
+        }
+        /* 確保右邊預覽的所有標籤都是純黑 */
+        .editor-preview *, .editor-preview-side * {
+          color: #000000 !important;
+        }
+        
+        /* 工具列按鈕 */
+        .editor-toolbar { background-color: #f8f9fa !important; border-bottom: 1px solid #ddd !important; }
+        .editor-toolbar button { color: #333333 !important; }
+        .editor-toolbar button.active, .editor-toolbar button:hover { background-color: #e2e8f0 !important; color: #000000 !important; }
+      }
 
-        <!-- 區塊 3：連結管理 -->
-        <details class="main-section">
-          <summary>🔗 相關連結管理</summary>
-          <div class="main-section-body">
-            <div id="links-container">
-              {% for link in data.links %}
-              <div class="link-row">
+      /* ==========================================================
+         🌙 暗色模式 (Dark Mode)
+         ========================================================== */
+      @media (prefers-color-scheme: dark) {
+        body, input, textarea, summary { color: #ffffff !important; font-weight: 500 !important; }
+        h1, h2, h3, h4, h5, h6, label { color: #ffffff !important; }
+        
+        /* 📝 左邊：編輯器 */
+        .CodeMirror { 
+          background-color: #1a1a1a !important; 
+          border-color: #444 !important; 
+          color: #ffffff !important;
+          font-weight: 400 !important;
+          line-height: 1.8 !important;
+          font-size: 16px !important;
+        }
+        .CodeMirror-cursor { border-left: 2px solid #ffffff !important; }
+
+        /* 👁️ 右邊：預覽畫面 (同時修復眼睛與並排按鈕) */
+        .editor-preview, .editor-preview-side { 
+          background-color: #1a1a1a !important; 
+          color: #ffffff !important; /* 純白 */
+          font-weight: 400 !important;
+          line-height: 1.8 !important;
+          font-size: 16px !important;
+          white-space: pre-wrap !important; /* 這裡負責保留空行 */
+          border-color: #444 !important;
+        }
+        .editor-preview *, .editor-preview-side * {
+          color: #ffffff !important;
+        }
+        
+        /* 工具列 */
+        .editor-toolbar { background-color: #242424 !important; border-color: #444 !important; }
+        .editor-toolbar button { color: #dddddd !important; }
+        .editor-toolbar button.active, .editor-toolbar button:hover { background-color: #444444 !important; color: #ffffff !important; }
+      }
+
+      /* ==========================================================
+         佈局與其他 UI 元件
+         ========================================================== */
+      .page-header { display: flex; justify-content: space-between; align-items: center; }
+      .success-message { background-color: var(--pico-color-green-100); border: 1px solid var(--pico-color-green-200); color: var(--pico-color-green-700); padding: var(--pico-spacing); border-radius: var(--pico-border-radius); margin-bottom: var(--pico-spacing); }
+      .link-row { display: grid; grid-template-columns: 1fr 1fr auto; grid-gap: var(--pico-spacing); align-items: flex-end; margin-bottom: var(--pico-spacing); }
+      .link-row label { margin-bottom: 0; }
+      
+      .main-section { background-color: var(--pico-background-color); border: 2px solid var(--pico-form-element-border-color); border-radius: var(--pico-border-radius); margin-bottom: 1.5rem; padding: 0; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+      .main-section > summary { font-size: 1.25rem; font-weight: 700; margin: 0; padding: 15px 20px; border-radius: var(--pico-border-radius); transition: background-color 0.2s; }
+      .main-section > summary:hover { background-color: var(--pico-form-element-active-background-color); }
+      .main-section[open] > summary { border-bottom-left-radius: 0; border-bottom-right-radius: 0; border-bottom: 2px solid var(--pico-form-element-border-color); margin-bottom: var(--pico-spacing); }
+      .main-section-body { padding: 0 20px 20px 20px; }
+
+      .entry-card { background-color: var(--pico-background-color); border: 1px solid var(--pico-form-element-border-color); border-radius: var(--pico-border-radius); margin-bottom: 1.5rem; padding: 0; }
+      .entry-card > summary { font-weight: 600; font-size: 1.1rem; margin: 0; padding: 15px 20px; border-radius: var(--pico-border-radius); transition: background-color 0.2s; }
+      .entry-card > summary:hover { background-color: var(--pico-form-element-active-background-color); }
+      .entry-card[open] > summary { border-bottom-left-radius: 0; border-bottom-right-radius: 0; border-bottom: 1px solid var(--pico-form-element-border-color); margin-bottom: var(--pico-spacing); }
+      .entry-card-body { padding: 0 20px 20px 20px; }
+      
+      .chapter-card { border-style: dashed; margin-bottom: 1rem; }
+      .chapter-card > summary { font-size: 1rem; }
+      
+      .danger-btn { color: #e53935 !important; border-color: #e53935 !important; background: transparent !important; }
+      .danger-btn:hover { background: #e53935 !important; color: #fff !important; }
+    </style>
+    <!-- 原本的 Highlight.js -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+
+    <!-- 👇 新增這三行：引入 KaTeX 讓編輯器支援數學式 👇 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+  </head>
+  <body>
+    <main class="container" style="max-width: 960px">
+      <article>
+        <header class="page-header">
+          <h2>網站內容編輯</h2>
+          <a href="/admin/logout" role="button" class="secondary">登出</a>
+        </header>
+
+        {% if updated %}
+        <div class="success-message">資料已成功更新！</div>
+        {% endif %}
+
+        <form action="/admin/edit" method="post">
+          
+          <details class="main-section">
+            <summary>🏠 首頁設定</summary>
+            <div class="main-section-body">
+              <div class="grid">
                 <div>
-                  <label>連結名稱:</label>
-                  <input type="text" name="link_names" placeholder="例如：Google" value="{{ link.name }}" />
+                  <label for="home_title">Title:</label>
+                  <input type="text" id="home_title" name="home_title" value="{{ data.home.title }}" />
                 </div>
                 <div>
-                  <label>連結 URL:</label>
-                  <input type="url" name="link_urls" placeholder="https://..." value="{{ link.url }}" />
+                  <label for="home_subtitle">Subtitle:</label>
+                  <input type="text" id="home_subtitle" name="home_subtitle" value="{{ data.home.subtitle }}" />
                 </div>
-                <button type="button" class="secondary outline remove-link">移除</button>
               </div>
-              {% endfor %}
             </div>
-            <button type="button" id="add-link" class="secondary">新增連結</button>
-          </div>
-        </details>
+          </details>
 
-        <!-- 🌟 區塊 4：作品集 / 里程碑管理 (已改為雙層折疊) -->
-        <details class="main-section" open>
-          <summary>🏆 里程碑與成就 (Portfolio)</summary>
-          <div class="main-section-body">
-            <div id="portfolios-container">
-              {% for port in data.portfolios %}
-              <details class="entry-card portfolio-entry">
-                <summary>
-                  🎯 紀錄：<span class="display-portfolio-title">{{ port.name if port.name else '未命名紀錄' }}</span>
-                </summary>
-                
-                <div class="entry-card-body">
-                  <input type="hidden" name="portfolio_ids" value="{{ port.id }}" />
-                  
-                  <div class="grid">
-                    <div>
-                      <label>專案名稱 (Name):</label>
-                      <input type="text" name="portfolio_names" class="portfolio-title-input" value="{{ port.name }}" required />
-                    </div>
-                    <div>
-                      <label>專案連結 (Link):</label>
-                      <input type="url" name="portfolio_links" value="{{ port.link }}" />
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <label>專案描述 (Description):</label>
-                    <textarea name="portfolio_descs" rows="3" required>{{ port.desc }}</textarea>
-                  </div>
-                  
-                  <button type="button" class="outline danger-btn remove-portfolio" style="width: auto; margin-top: 10px;">移除作品</button>
+          <details class="main-section">
+            <summary>📞 聯絡資訊</summary>
+            <div class="main-section-body">
+              <div class="grid">
+                <div>
+                  <label for="email">Email:</label>
+                  <input type="email" id="email" name="email" value="{{ data.contact.email }}" />
                 </div>
-              </details>
-              {% endfor %}
+                <div>
+                  <label for="phone">Phone:</label>
+                  <input type="tel" id="phone" name="phone" value="{{ data.contact.phone }}" />
+                </div>
+              </div>
             </div>
-            <button type="button" id="add-portfolio" class="secondary" style="margin-top: 10px;">+ 新增紀錄</button>
-          </div>
-        </details>
+          </details>
 
-        <!-- 區塊 5：文章管理 -->
-        <details class="main-section">
-          <summary>📚 文章與筆記庫</summary>
-          <div class="main-section-body">
-            <div id="articles-container">
-              {% for article in data.articles %}
-              <details class="entry-card article-entry">
-                <summary>
-                  📝 文章：<span class="display-title">{{ article.title if article.title else '未命名文章' }}</span>
-                </summary>
-                
-                <div class="entry-card-body">
-                  <input type="hidden" name="article_ids" value="{{ article.id if article.id is defined else '' }}" />
-                  
-                  <div class="grid" style="align-items: flex-end;">
-                    <div>
-                      <label>文章標題:</label>
-                      <input type="text" name="article_titles" class="title-input" placeholder="請輸入主文章標題" value="{{ article.title }}" required />
-                    </div>
-                    <button type="button" class="outline danger-btn remove-article" style="width: auto; margin-bottom: var(--pico-spacing);">移除整篇文章</button>
-                  </div>
-
+          <details class="main-section">
+            <summary>🔗 相關連結管理</summary>
+            <div class="main-section-body">
+              <div id="links-container">
+                {% for link in data.links %}
+                <div class="link-row">
                   <div>
-                    <label>文章摘要 (顯示在列表):</label>
-                    <textarea name="article_summaries" placeholder="請輸入文章摘要...">{{ article.summary }}</textarea>
+                    <label>連結名稱:</label>
+                    <input type="text" name="link_names" placeholder="例如：Google" value="{{ link.name }}" />
                   </div>
+                  <div>
+                    <label>連結 URL:</label>
+                    <input type="url" name="link_urls" placeholder="https://..." value="{{ link.url }}" />
+                  </div>
+                  <button type="button" class="secondary outline remove-link">移除</button>
+                </div>
+                {% endfor %}
+              </div>
+              <button type="button" id="add-link" class="secondary">新增連結</button>
+            </div>
+          </details>
 
-                  <h4 style="margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--pico-form-element-border-color);">集數 / 章節管理</h4>
+          <details class="main-section" open>
+            <summary>🏆 里程碑與成就 (Portfolio)</summary>
+            <div class="main-section-body">
+              <div id="portfolios-container">
+                {% for port in data.portfolios %}
+                <details class="entry-card portfolio-entry">
+                  <summary>
+                    🎯 紀錄：<span class="display-portfolio-title">{{ port.name if port.name else '未命名紀錄' }}</span>
+                  </summary>
                   
-                  <div class="chapters-container">
-                    {% for chapter in article.chapters %}
-                    <details class="entry-card chapter-card chapter-entry">
-                      <summary>
-                        📺 集數：<span class="display-chapter-title">{{ chapter.chapter_title if chapter.chapter_title else '未命名集數' }}</span>
-                      </summary>
-                      
-                      <div class="entry-card-body">
-                        <input type="hidden" name="chapter_ids_{{ article.id }}" value="{{ chapter.chapter_id if chapter.chapter_id is defined else '' }}" />
-                        
-                        <div class="grid" style="align-items: flex-end;">
-                          <div>
-                            <label>集數標題:</label>
-                            <input type="text" name="chapter_titles_{{ article.id }}" class="chapter-title-input" placeholder="例如：第一集：變數與資料型態" value="{{ chapter.chapter_title }}" required />
-                          </div>
-                          <button type="button" class="outline danger-btn remove-chapter" style="width: auto; margin-bottom: var(--pico-spacing);">移除集數</button>
-                        </div>
-                        
-                        <div>
-                          <label>集數內容 (支援 Markdown):</label>
-                          <textarea class="markdown-editor" name="chapter_contents_{{ article.id }}" placeholder="請輸入該集數的詳細內容...">{{ chapter.content }}</textarea>
-                        </div>
+                  <div class="entry-card-body">
+                    <input type="hidden" name="portfolio_ids" value="{{ port.id }}" />
+                    
+                    <div class="grid">
+                      <div>
+                        <label>專案名稱 (Name):</label>
+                        <input type="text" name="portfolio_names" class="portfolio-title-input" value="{{ port.name }}" required />
                       </div>
-                    </details>
-                    {% endfor %}
+                      <div>
+                        <label>專案連結 (Link):</label>
+                        <input type="url" name="portfolio_links" value="{{ port.link }}" />
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label>專案描述 (Description):</label>
+                      <textarea name="portfolio_descs" rows="3" required>{{ port.desc }}</textarea>
+                    </div>
+                    
+                    <button type="button" class="outline danger-btn remove-portfolio" style="width: auto; margin-top: 10px;">移除作品</button>
                   </div>
-
-                  <button type="button" class="secondary outline add-chapter-btn" style="width: 100%; border-style: dashed;">+ 新增集數</button>
-                </div>
-              </details>
-              {% endfor %}
+                </details>
+                {% endfor %}
+              </div>
+              <button type="button" id="add-portfolio" class="secondary" style="margin-top: 10px;">+ 新增紀錄</button>
             </div>
+          </details>
 
-            <button type="button" id="add-article" class="secondary" style="margin-top: 10px;">+ 新增文章</button>
-          </div>
-        </details>
+          <details class="main-section">
+            <summary>📚 文章與筆記庫</summary>
+            <div class="main-section-body">
+              <div id="articles-container">
+                {% for article in data.articles %}
+                <details class="entry-card article-entry">
+                  <summary>
+                    📝 文章：<span class="display-title">{{ article.title if article.title else '未命名文章' }}</span>
+                  </summary>
+                  
+                  <div class="entry-card-body">
+                    <input type="hidden" name="article_ids" value="{{ article.id if article.id is defined else '' }}" />
+                    
+                    <div class="grid" style="align-items: flex-end;">
+                      <div>
+                        <label>文章標題:</label>
+                        <input type="text" name="article_titles" class="title-input" placeholder="請輸入主文章標題" value="{{ article.title }}" required />
+                      </div>
+                      <button type="button" class="outline danger-btn remove-article" style="width: auto; margin-bottom: var(--pico-spacing);">移除整篇文章</button>
+                    </div>
 
-        <!-- 底部儲存按鈕 -->
-        <button type="submit" style="font-weight: 600; font-size: 1.1rem; padding: 12px; margin-top: 20px;">💾 儲存所有變更</button>
-      </form>
-    </article>
-  </main>
+                    <div>
+                      <label>文章摘要 (顯示在列表):</label>
+                      <textarea name="article_summaries" placeholder="請輸入文章摘要...">{{ article.summary }}</textarea>
+                    </div>
 
-  <!-- ================= 模板區塊 (Templates) ================= -->
-  <template id="link-template">
-    <div class="link-row">
-      <div>
-        <label>連結名稱:</label>
-        <input type="text" name="link_names" placeholder="例如：Google" />
-      </div>
-      <div>
-        <label>連結 URL:</label>
-        <input type="url" name="link_urls" placeholder="https://..." />
-      </div>
-      <button type="button" class="secondary outline remove-link">移除</button>
-    </div>
-  </template>
+                    <h4 style="margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--pico-form-element-border-color);">集數 / 章節管理</h4>
+                    
+                    <div class="chapters-container">
+                      {% for chapter in article.chapters %}
+                      <details class="entry-card chapter-card chapter-entry">
+                        <summary>
+                          📺 集數：<span class="display-chapter-title">{{ chapter.chapter_title if chapter.chapter_title else '未命名集數' }}</span>
+                        </summary>
+                        
+                        <div class="entry-card-body">
+                          <input type="hidden" name="chapter_ids_{{ article.id }}" value="{{ chapter.chapter_id if chapter.chapter_id is defined else '' }}" />
+                          
+                          <div class="grid" style="align-items: flex-end;">
+                            <div>
+                              <label>集數標題:</label>
+                              <input type="text" name="chapter_titles_{{ article.id }}" class="chapter-title-input" placeholder="例如：第一集：變數與資料型態" value="{{ chapter.chapter_title }}" required />
+                            </div>
+                            <button type="button" class="outline danger-btn remove-chapter" style="width: auto; margin-bottom: var(--pico-spacing);">移除集數</button>
+                          </div>
+                          
+                          <div>
+                            <label>集數內容 (支援 Markdown):</label>
+                            <textarea class="markdown-editor" name="chapter_contents_{{ article.id }}" placeholder="請輸入該集數的詳細內容...">{{ chapter.content }}</textarea>
+                          </div>
+                        </div>
+                      </details>
+                      {% endfor %}
+                    </div>
 
-  <!-- 🌟 新增的模板結構也改為折疊式 -->
-  <template id="portfolio-template">
-    <details class="entry-card portfolio-entry" open>
-      <summary>
-        🎯 紀錄：<span class="display-portfolio-title">未命名紀錄</span>
-      </summary>
-      
-      <div class="entry-card-body">
-        <input type="hidden" name="portfolio_ids" value="new" />
-        <div class="grid">
-          <div>
-            <label>專案名稱 (Name):</label>
-            <input type="text" name="portfolio_names" class="portfolio-title-input" placeholder="例如：2025 台北馬拉松" required />
-          </div>
-          <div>
-            <label>專案連結 (Link):</label>
-            <input type="url" name="portfolio_links" placeholder="https://..." />
-          </div>
+                    <button type="button" class="secondary outline add-chapter-btn" style="width: 100%; border-style: dashed;">+ 新增集數</button>
+                  </div>
+                </details>
+                {% endfor %}
+              </div>
+
+              <button type="button" id="add-article" class="secondary" style="margin-top: 10px;">+ 新增文章</button>
+            </div>
+          </details>
+
+          <button type="submit" style="font-weight: 600; font-size: 1.1rem; padding: 12px; margin-top: 20px;">💾 儲存所有變更</button>
+        </form>
+      </article>
+    </main>
+
+    <template id="link-template">
+      <div class="link-row">
+        <div>
+          <label>連結名稱:</label>
+          <input type="text" name="link_names" placeholder="例如：Google" />
         </div>
         <div>
-          <label>專案描述 (Description):</label>
-          <textarea name="portfolio_descs" rows="3" placeholder="請輸入成就說明或完賽時間..." required></textarea>
+          <label>連結 URL:</label>
+          <input type="url" name="link_urls" placeholder="https://..." />
         </div>
-        <button type="button" class="outline danger-btn remove-portfolio" style="width: auto; margin-top: 10px;">移除作品</button>
+        <button type="button" class="secondary outline remove-link">移除</button>
       </div>
-    </details>
-  </template>
+    </template>
 
-  <template id="article-template">
-    <details class="entry-card article-entry" open>
-      <summary>
-        📝 文章：<span class="display-title">未命名文章</span>
-      </summary>
-      <div class="entry-card-body">
-        <input type="hidden" name="article_ids" value="" />
-        <div class="grid" style="align-items: flex-end;">
-          <div>
-            <label>文章標題:</label>
-            <input type="text" name="article_titles" class="title-input" placeholder="請輸入主文章標題" required />
-          </div>
-          <button type="button" class="outline danger-btn remove-article" style="width: auto; margin-bottom: var(--pico-spacing);">移除整篇文章</button>
-        </div>
-        <div>
-          <label>文章摘要 (顯示在列表):</label>
-          <textarea name="article_summaries" placeholder="請輸入文章摘要..."></textarea>
-        </div>
-        <h4 style="margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--pico-form-element-border-color);">集數 / 章節管理</h4>
-        <div class="chapters-container"></div>
-        <button type="button" class="secondary outline add-chapter-btn" style="width: 100%; border-style: dashed;">+ 新增集數</button>
-      </div>
-    </details>
-  </template>
-
-  <template id="chapter-template">
-    <details class="entry-card chapter-card chapter-entry" open>
-      <summary>
-        📺 集數：<span class="display-chapter-title">未命名集數</span>
-      </summary>
-      <div class="entry-card-body">
-        <input type="hidden" name="chapter_ids_PLACEHOLDER" value="" />
-        <div class="grid" style="align-items: flex-end;">
-          <div>
-            <label>集數標題:</label>
-            <input type="text" name="chapter_titles_PLACEHOLDER" class="chapter-title-input" placeholder="例如：第一集：變數與資料型態" required />
-          </div>
-          <button type="button" class="outline danger-btn remove-chapter" style="width: auto; margin-bottom: var(--pico-spacing);">移除集數</button>
-        </div>
-        <div>
-          <label>集數內容 (支援 Markdown):</label>
-          <textarea class="markdown-editor" name="chapter_contents_PLACEHOLDER" placeholder="請輸入該集數的詳細內容..."></textarea>
-        </div>
-      </div>
-    </details>
-  </template>
-
-  <!-- ================= 腳本區塊 (Scripts) ================= -->
-  <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
-
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      
-      const initEasyMDE = (textareaElement) => {
-        new EasyMDE({
-          element: textareaElement,
-          spellChecker: false,
-          status: false,
-          maxHeight: "300px",
-          toolbar: [
-            "bold", "italic", "heading", "|",
-            "quote", "unordered-list", "ordered-list", "|",
-            "link", "image", "code", "|",
-            "preview", "side-by-side", "fullscreen"
-          ]
-        });
-      };
-
-      document.querySelectorAll('.markdown-editor').forEach(textarea => {
-          initEasyMDE(textarea);
-      });
-
-      // 連結管理
-      const linksContainer = document.getElementById("links-container");
-      const addLinkButton = document.getElementById("add-link");
-      const linkTemplate = document.getElementById("link-template");
-
-      addLinkButton.addEventListener("click", () => {
-        linksContainer.appendChild(linkTemplate.content.cloneNode(true));
-      });
-
-      linksContainer.addEventListener("click", (e) => {
-        if (e.target && e.target.classList.contains("remove-link")) {
-          e.target.closest(".link-row").remove();
-        }
-      });
-
-      // 🌟 作品集管理 (加入了即時標題連動)
-      const portfoliosContainer = document.getElementById("portfolios-container");
-      const addPortfolioButton = document.getElementById("add-portfolio");
-      const portfolioTemplate = document.getElementById("portfolio-template");
-
-      // 讓打字時，上方的折疊標題即時更新
-      portfoliosContainer.addEventListener('input', (e) => {
-        if (e.target.classList.contains('portfolio-title-input')) {
-          const headerSpan = e.target.closest('.portfolio-entry').querySelector(':scope > summary .display-portfolio-title');
-          if (headerSpan) headerSpan.textContent = e.target.value || '未命名紀錄';
-        }
-      });
-
-      addPortfolioButton.addEventListener("click", () => {
-        portfoliosContainer.appendChild(portfolioTemplate.content.cloneNode(true));
-      });
-
-      portfoliosContainer.addEventListener("click", (e) => {
-        if (e.target && e.target.classList.contains("remove-portfolio")) {
-          if (confirm("確定要刪除這個作品/紀錄嗎？")) {
-            e.target.closest(".portfolio-entry").remove();
-          }
-        }
-      });
-
-      // 文章與集數管理
-      const articlesContainer = document.getElementById("articles-container");
-      const addArticleButton = document.getElementById("add-article");
-      const articleTemplate = document.getElementById("article-template");
-      const chapterTemplate = document.getElementById("chapter-template");
-
-      let tempArticleIdCounter = 10000;
-
-      articlesContainer.addEventListener('input', (e) => {
-        if (e.target.classList.contains('title-input')) {
-          const headerSpan = e.target.closest('.article-entry').querySelector(':scope > summary .display-title');
-          if (headerSpan) headerSpan.textContent = e.target.value || '未命名文章';
-        }
-        if (e.target.classList.contains('chapter-title-input')) {
-          const headerSpan = e.target.closest('.chapter-entry').querySelector(':scope > summary .display-chapter-title');
-          if (headerSpan) headerSpan.textContent = e.target.value || '未命名集數';
-        }
-      });
-
-      const createChapter = (chaptersContainer, articleId) => {
-        const newChapterClone = chapterTemplate.content.cloneNode(true);
-        const chapterEntry = newChapterClone.querySelector(".chapter-entry");
-        const tempChapterId = `new_ch_${Date.now()}`;
-
-        chapterEntry.querySelector('input[name^="chapter_ids_"]').name = `chapter_ids_${articleId}`;
-        chapterEntry.querySelector('input[name^="chapter_ids_"]').value = tempChapterId; 
-        chapterEntry.querySelector('input[name^="chapter_titles_"]').name = `chapter_titles_${articleId}`;
+    <template id="portfolio-template">
+      <details class="entry-card portfolio-entry" open>
+        <summary>
+          🎯 紀錄：<span class="display-portfolio-title">未命名紀錄</span>
+        </summary>
         
-        const textarea = chapterEntry.querySelector('textarea[name^="chapter_contents_"]');
-        textarea.name = `chapter_contents_${articleId}`;
+        <div class="entry-card-body">
+          <input type="hidden" name="portfolio_ids" value="new" />
+          <div class="grid">
+            <div>
+              <label>專案名稱 (Name):</label>
+              <input type="text" name="portfolio_names" class="portfolio-title-input" placeholder="例如：2025 台北馬拉松" required />
+            </div>
+            <div>
+              <label>專案連結 (Link):</label>
+              <input type="url" name="portfolio_links" placeholder="https://..." />
+            </div>
+          </div>
+          <div>
+            <label>專案描述 (Description):</label>
+            <textarea name="portfolio_descs" rows="3" placeholder="請輸入成就說明或完賽時間..." required></textarea>
+          </div>
+          <button type="button" class="outline danger-btn remove-portfolio" style="width: auto; margin-top: 10px;">移除作品</button>
+        </div>
+      </details>
+    </template>
 
-        chaptersContainer.appendChild(chapterEntry);
-        initEasyMDE(textarea);
-      };
+    <template id="article-template">
+      <details class="entry-card article-entry" open>
+        <summary>
+          📝 文章：<span class="display-title">未命名文章</span>
+        </summary>
+        <div class="entry-card-body">
+          <input type="hidden" name="article_ids" value="" />
+          <div class="grid" style="align-items: flex-end;">
+            <div>
+              <label>文章標題:</label>
+              <input type="text" name="article_titles" class="title-input" placeholder="請輸入主文章標題" required />
+            </div>
+            <button type="button" class="outline danger-btn remove-article" style="width: auto; margin-bottom: var(--pico-spacing);">移除整篇文章</button>
+          </div>
+          <div>
+            <label>文章摘要 (顯示在列表):</label>
+            <textarea name="article_summaries" placeholder="請輸入文章摘要..."></textarea>
+          </div>
+          <h4 style="margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--pico-form-element-border-color);">集數 / 章節管理</h4>
+          <div class="chapters-container"></div>
+          <button type="button" class="secondary outline add-chapter-btn" style="width: 100%; border-style: dashed;">+ 新增集數</button>
+        </div>
+      </details>
+    </template>
 
-      const initializeArticleEvents = (articleEntry, isNew = false) => {
-        const chaptersContainer = articleEntry.querySelector(".chapters-container");
-        let articleId = articleEntry.querySelector('input[name="article_ids"]').value;
+    <template id="chapter-template">
+      <details class="entry-card chapter-card chapter-entry" open>
+        <summary>
+          📺 集數：<span class="display-chapter-title">未命名集數</span>
+        </summary>
+        <div class="entry-card-body">
+          <input type="hidden" name="chapter_ids_PLACEHOLDER" value="" />
+          <div class="grid" style="align-items: flex-end;">
+            <div>
+              <label>集數標題:</label>
+              <input type="text" name="chapter_titles_PLACEHOLDER" class="chapter-title-input" placeholder="例如：第一集：變數與資料型態" required />
+            </div>
+            <button type="button" class="outline danger-btn remove-chapter" style="width: auto; margin-bottom: var(--pico-spacing);">移除集數</button>
+          </div>
+          <div>
+            <label>集數內容 (支援 Markdown):</label>
+            <textarea class="markdown-editor" name="chapter_contents_PLACEHOLDER" placeholder="請輸入該集數的詳細內容..."></textarea>
+          </div>
+        </div>
+      </details>
+    </template>
 
-        const addChapterBtn = articleEntry.querySelector(".add-chapter-btn");
-        addChapterBtn.addEventListener("click", () => {
-          createChapter(chaptersContainer, articleId);
+    <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        
+        const initEasyMDE = (textareaElement) => {
+          new EasyMDE({
+            element: textareaElement,
+            spellChecker: false,
+            status: ["lines", "words", "cursor"],
+            maxHeight: "450px",
+            renderingConfig: {
+              singleLineBreaks: true,
+              codeSyntaxHighlighting: true,
+            },
+            // 🌟 讓預覽畫面自動把 $$ 解析成數學式的魔法
+            previewRender: function(plainText, preview) {
+              // 在渲染完成後 50 毫秒，呼叫 KaTeX 去尋找數學符號並轉換
+              setTimeout(() => {
+                renderMathInElement(preview, {
+                  delimiters: [
+                    {left: '$$', right: '$$', display: true}, // 獨立區塊數學式
+                    {left: '$', right: '$', display: false}   // 行內數學式
+                  ],
+                  throwOnError: false
+                });
+              }, 50);
+              // 回傳預設的 Markdown 轉換結果
+              return this.parent.markdown(plainText);
+            },
+            // 🌟 擴充工具列：加入「字體大小」專屬按鈕
+            toolbar: [
+              "bold", "italic", "strikethrough", "heading", "|",
+              {
+                name: "font-size",
+                action: function customFunction(editor){
+                  const cm = editor.codemirror;
+                  const selection = cm.getSelection();
+                  const text = selection ? selection : "請在這裡輸入文字";
+                  // 自動包上 HTML 標籤，你可以自行更改數字
+                  cm.replaceSelection(`<span style="font-size: 24px;">${text}</span>`);
+                },
+                className: "fa fa-font",
+                title: "設定字體大小",
+              },
+              "|",
+              "quote", "code", "unordered-list", "ordered-list", "|",
+              "table", "horizontal-rule", "link", "image", "|",
+              "preview", "side-by-side", "fullscreen", "|",
+              "guide"
+            ]
+          });
+        };
+
+        document.querySelectorAll('.markdown-editor').forEach(textarea => {
+            initEasyMDE(textarea);
         });
 
-        if (isNew) {
-          createChapter(chaptersContainer, articleId);
-        }
-      };
+        // 連結管理
+        const linksContainer = document.getElementById("links-container");
+        const addLinkButton = document.getElementById("add-link");
+        const linkTemplate = document.getElementById("link-template");
 
-      document.querySelectorAll(".article-entry").forEach((articleEntry) => {
-        initializeArticleEvents(articleEntry, false);
-      });
+        addLinkButton.addEventListener("click", () => {
+          linksContainer.appendChild(linkTemplate.content.cloneNode(true));
+        });
 
-      addArticleButton.addEventListener("click", () => {
-        const tempId = `new_${tempArticleIdCounter++}`; 
-        const newArticleClone = articleTemplate.content.cloneNode(true);
-        const newArticleEntry = newArticleClone.querySelector(".article-entry");
-
-        newArticleEntry.querySelector('input[name="article_ids"]').value = tempId;
-
-        articlesContainer.appendChild(newArticleEntry);
-        initializeArticleEvents(newArticleEntry, true);
-      });
-
-      articlesContainer.addEventListener("click", (e) => {
-        if (e.target && e.target.classList.contains("remove-article")) {
-          if(confirm("確定要刪除整篇文章及裡面所有的集數嗎？")) {
-            e.target.closest(".article-entry").remove();
+        linksContainer.addEventListener("click", (e) => {
+          if (e.target && e.target.classList.contains("remove-link")) {
+            e.target.closest(".link-row").remove();
           }
-          return;
-        }
+        });
 
-        if (e.target && e.target.classList.contains("remove-chapter")) {
-          if(confirm("確定要刪除這個集數嗎？")) {
-            e.target.closest(".chapter-entry").remove();
+        // 作品集管理
+        const portfoliosContainer = document.getElementById("portfolios-container");
+        const addPortfolioButton = document.getElementById("add-portfolio");
+        const portfolioTemplate = document.getElementById("portfolio-template");
+
+        portfoliosContainer.addEventListener('input', (e) => {
+          if (e.target.classList.contains('portfolio-title-input')) {
+            const headerSpan = e.target.closest('.portfolio-entry').querySelector(':scope > summary .display-portfolio-title');
+            if (headerSpan) headerSpan.textContent = e.target.value || '未命名紀錄';
           }
-          return;
-        }
+        });
+
+        addPortfolioButton.addEventListener("click", () => {
+          portfoliosContainer.appendChild(portfolioTemplate.content.cloneNode(true));
+        });
+
+        portfoliosContainer.addEventListener("click", (e) => {
+          if (e.target && e.target.classList.contains("remove-portfolio")) {
+            if (confirm("確定要刪除這個作品/紀錄嗎？")) {
+              e.target.closest(".portfolio-entry").remove();
+            }
+          }
+        });
+
+        // 文章與集數管理
+        const articlesContainer = document.getElementById("articles-container");
+        const addArticleButton = document.getElementById("add-article");
+        const articleTemplate = document.getElementById("article-template");
+        const chapterTemplate = document.getElementById("chapter-template");
+
+        let tempArticleIdCounter = 10000;
+
+        articlesContainer.addEventListener('input', (e) => {
+          if (e.target.classList.contains('title-input')) {
+            const headerSpan = e.target.closest('.article-entry').querySelector(':scope > summary .display-title');
+            if (headerSpan) headerSpan.textContent = e.target.value || '未命名文章';
+          }
+          if (e.target.classList.contains('chapter-title-input')) {
+            const headerSpan = e.target.closest('.chapter-entry').querySelector(':scope > summary .display-chapter-title');
+            if (headerSpan) headerSpan.textContent = e.target.value || '未命名集數';
+          }
+        });
+
+        const createChapter = (chaptersContainer, articleId) => {
+          const newChapterClone = chapterTemplate.content.cloneNode(true);
+          const chapterEntry = newChapterClone.querySelector(".chapter-entry");
+          const tempChapterId = `new_ch_${Date.now()}`;
+
+          chapterEntry.querySelector('input[name^="chapter_ids_"]').name = `chapter_ids_${articleId}`;
+          chapterEntry.querySelector('input[name^="chapter_ids_"]').value = tempChapterId; 
+          chapterEntry.querySelector('input[name^="chapter_titles_"]').name = `chapter_titles_${articleId}`;
+          
+          const textarea = chapterEntry.querySelector('textarea[name^="chapter_contents_"]');
+          textarea.name = `chapter_contents_${articleId}`;
+
+          chaptersContainer.appendChild(chapterEntry);
+          initEasyMDE(textarea);
+        };
+
+        const initializeArticleEvents = (articleEntry, isNew = false) => {
+          const chaptersContainer = articleEntry.querySelector(".chapters-container");
+          let articleId = articleEntry.querySelector('input[name="article_ids"]').value;
+
+          const addChapterBtn = articleEntry.querySelector(".add-chapter-btn");
+          addChapterBtn.addEventListener("click", () => {
+            createChapter(chaptersContainer, articleId);
+          });
+
+          if (isNew) {
+            createChapter(chaptersContainer, articleId);
+          }
+        };
+
+        document.querySelectorAll(".article-entry").forEach((articleEntry) => {
+          initializeArticleEvents(articleEntry, false);
+        });
+
+        addArticleButton.addEventListener("click", () => {
+          const tempId = `new_${tempArticleIdCounter++}`; 
+          const newArticleClone = articleTemplate.content.cloneNode(true);
+          const newArticleEntry = newArticleClone.querySelector(".article-entry");
+
+          newArticleEntry.querySelector('input[name="article_ids"]').value = tempId;
+
+          articlesContainer.appendChild(newArticleEntry);
+          initializeArticleEvents(newArticleEntry, true);
+        });
+
+        articlesContainer.addEventListener("click", (e) => {
+          if (e.target && e.target.classList.contains("remove-article")) {
+            if(confirm("確定要刪除整篇文章及裡面所有的集數嗎？")) {
+              e.target.closest(".article-entry").remove();
+            }
+            return;
+          }
+
+          if (e.target && e.target.classList.contains("remove-chapter")) {
+            if(confirm("確定要刪除這個集數嗎？")) {
+              e.target.closest(".chapter-entry").remove();
+            }
+            return;
+          }
+        });
       });
-    });
-  </script>
-</body>
+    </script>
+  </body>
 </html>
