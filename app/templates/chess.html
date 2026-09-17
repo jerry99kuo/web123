@@ -2,106 +2,200 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>Geister 殘局解謎 | 題庫連線版</title>
+    <title>Geister 殘局解謎</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
-            font-family: 'Inter', sans-serif; 
-            background: linear-gradient(135deg, #0f172a, #1e293b);
-            color: #e2e8f0; min-height: 100vh;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #131312d3;
+            color: #bababa;
+            min-height: 100vh;
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center;
         }
 
         .game-container {
-            background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px;
-            padding: 40px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            display: flex; gap: 60px; align-items: flex-start;
+            display: flex; 
+            gap: 100px;
+            align-items: flex-start;
+            justify-content: center;
+            width: 100%;
+            max-width: 1200px;
         }
 
-        .sidebar { display: flex; flex-direction: column; gap: 20px; width: 280px; }
-        h2 { font-size: 24px; font-weight: 700; color: #f8fafc; }
-        .tagline { font-size: 13px; color: #94a3b8; line-height: 1.6; }
+        .sidebar { 
+            display: flex; 
+            flex-direction: 
+            column; 
+            gap: 24px; 
+            width: 320px; 
+        }
         
-        .control-group { display: flex; flex-direction: column; gap: 8px; }
-        label { font-size: 11px; color: #94a3b8; font-weight: 600; }
+        .header-section { 
+            border-bottom: 1px solid #403d39; 
+            padding-bottom: 15px; 
+        }
+
+        h2 { 
+            font-size: 28px; 
+            font-weight: 600; 
+            color: #ffffff; 
+            margin-bottom: 8px;
+        }
+
+        .tagline { 
+            font-size: 14px; 
+            color: #8e8e8e; 
+            line-height: 1.5; 
+        }
         
-        select, button { padding: 12px; border-radius: 8px; font-size: 15px; cursor: pointer; transition: 0.2s; }
-        select { background: #334155; color: white; border: 1px solid #475569; }
-        button.action-btn { background: #3b82f6; color: white; border: none; font-weight: bold; }
-        button.action-btn:hover { background: #2563eb; transform: translateY(-1px); }
+        .control-group { display: flex; flex-direction: column; gap: 10px; }
+        label { font-size: 12px; color: #8e8e8e; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
 
-        .status-box { background: rgba(0,0,0,0.25); padding: 15px; border-radius: 8px; border-left: 4px solid #3b82f6; }
-        #puzzleTitle { font-size: 15px; font-weight: bold; margin-bottom: 5px; color: #f8fafc; }
-        #statusMessage { font-size: 13px; color: #cbd5e1; line-height: 1.5; }
+        select, button { 
+            padding: 14px; border-radius: 4px; font-size: 15px; cursor: pointer; 
+            transition: background-color 0.2s, border-color 0.2s; 
+            font-family: inherit;
+        }
+        select { 
+            background: #1e1d1a; color: #eee; border: 1px solid #403d39; outline: none;
+        }
+        select:focus { border-color: #629924; }
 
-        #solutionBox { display: none; padding: 12px; background: rgba(255,255,255,0.06); border-radius: 8px; font-size: 13px; color: #a3e635; line-height: 1.5;}
+        button.action-btn { 
+            background: #81b64c; 
+            color: white; 
+            border: none; 
+            font-weight: 600; 
+            text-shadow: 0 1px 1px rgba(0,0,0,0.3); 
+        }
 
-        /* 星星評分面板樣式 */
+        button.action-btn:hover { background: #8bc253; }
+        button.secondary-btn { background: #3c3a36; color: #cfcfcf; border: none; font-weight: 600;}
+        button.secondary-btn:hover { background: #4a4843; color: white;}
+
+        /* 狀態列 */
+        .status-box { background: #1e1d1a; padding: 15px; border-radius: 4px; border-left: 4px solid #81b64c; }
+        #puzzleTitle { font-size: 16px; font-weight: 600; margin-bottom: 5px; color: #ffffff; }
+        #statusMessage { font-size: 14px; color: #bababa; line-height: 1.5; }
+
+        #solutionBox { display: none; padding: 15px; background: #1e1d1a; border-radius: 4px; font-size: 14px; color: #81b64c; line-height: 1.6; border: 1px solid #333;}
+
+        /* 星星評分面板 */
         .rating-box {
-            display: none; background: rgba(251, 191, 36, 0.1); padding: 15px; 
-            border-radius: 8px; border-left: 4px solid #fbbf24; text-align: center;
+            display: none; background: #2a2212; padding: 20px; 
+            border-radius: 4px; border-left: 4px solid #f5a623; text-align: center;
         }
-        .rating-box h4 { font-size: 14px; color: #fbbf24; margin-bottom: 10px; }
-        .stars { display: flex; justify-content: center; gap: 8px; font-size: 28px; cursor: pointer; }
-        .star { color: #475569; transition: color 0.1s, transform 0.1s; }
-        .star:hover { transform: scale(1.15); }
-        .star.active { color: #fbbf24; text-shadow: 0 0 8px rgba(251, 191, 36, 0.5); }
+        .rating-box h4 { font-size: 14px; color: #f5a623; margin-bottom: 12px; }
+        .stars { display: flex; justify-content: center; gap: 4px; font-size: 24px; cursor: pointer; }
+        .star { color: #555; transition: color 0.1s; }
+        .star:hover { color: #f5a623; }
+        .star.active { color: #f5a623; }
 
-        /* 右側：戰略棋盤與外圍傳送門 */
+        /* 4. 棋盤區塊 (改成國際象棋雙色格) */
         .board-wrapper {
             position: relative;
-            background: #0f172a; padding: 12px; border-radius: 16px;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.6); border: 1px solid #334155;
+            background: #1e1d1a; padding: 16px; border-radius: 4px;
+            border: 1px solid #403d39;
+            /* 給脫逃點預留空間 */
+            margin: 20px;
         }
-        .board { 
-            display: grid; grid-template-columns: repeat(6, 75px); grid-template-rows: repeat(6, 75px);
-            gap: 3px; background-color: #1e293b;
-        }
-        .cell { 
-            background-color: #334155; display: flex; align-items: center; justify-content: center; 
-            cursor: pointer; transition: 0.15s;
-        }
-        .cell:hover { background-color: #475569; }
-        .selected { background-color: #3b82f6 !important; box-shadow: inset 0 0 15px rgba(0,0,0,0.4); }
-
-        /* 外部脫逃傳送門設計 */
-        .escape-portal {
-            position: absolute; width: 60px; height: 75px; 
-            background: rgba(59, 130, 246, 0.1); border: 2px dashed #3b82f6; border-radius: 10px;
-            display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; color: #3b82f6;
-            cursor: pointer; transition: all 0.3s; opacity: 0.4;
-        }
-        .escape-portal:hover { background: rgba(59, 130, 246, 0.4); opacity: 1; text-shadow: 0 0 5px white; }
         
-        .portal-tl { left: -75px; top: 12px; }
-        .portal-tr { right: -75px; top: 12px; }
-        .portal-bl { left: -75px; bottom: 12px; }
-        .portal-br { right: -75px; bottom: 12px; }
+        .board { 
+            display: grid; grid-template-columns: repeat(6, 100px); grid-template-rows: repeat(6, 100px);
+            /* 去除 gap，讓格子緊密相連 */
+            border: 2px solid #161512;
+        }
+        
+        .cell { 
+            display: flex; align-items: center; justify-content: center; 
+            cursor: pointer; position: relative;
+        }
 
-        /* 幽靈造型 */
+        /* 淺色格 */
+        .cell:nth-child(odd) { background-color: #ebecd0; }
+        /* 偶數列的淺色格會錯位，所以要調整 */
+        .board > .cell:nth-child(12n + 1),
+        .board > .cell:nth-child(12n + 3),
+        .board > .cell:nth-child(12n + 5),
+        .board > .cell:nth-child(12n + 8),
+        .board > .cell:nth-child(12n + 10),
+        .board > .cell:nth-child(12n + 12) { background-color: #ebecd0; }
+        
+        /* 深色格 (經典綠色版) */
+        .cell:nth-child(even) { background-color: #739552; }
+        .board > .cell:nth-child(12n + 2),
+        .board > .cell:nth-child(12n + 4),
+        .board > .cell:nth-child(12n + 6),
+        .board > .cell:nth-child(12n + 7),
+        .board > .cell:nth-child(12n + 9),
+        .board > .cell:nth-child(12n + 11) { background-color: #739552; }
+
+        /* 選中狀態 - 使用半透明黃色覆蓋 */
+        .selected::before { 
+            content: ''; position: absolute; inset: 0; 
+            background-color: rgba(246, 246, 105, 0.5); z-index: 5;
+        }
+        
+        /* 可以移動的目標提示 */
+        .cell:hover::after {
+            content: ''; 
+            position: absolute; 
+            inset: 0;
+            border: 4px solid rgba(255, 255, 255, 0.4); z-index: 6;
+        }
+
+        /* 5. 外部脫逃傳送門設計 - 改為專業標記 */
+        .escape-portal {
+            position: absolute; width: 60px; height: 80px; 
+            background: #2a2212; border: 2px dashed #f5a623; border-radius: 4px;
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 13px; font-weight: bold; color: #f5a623;
+            cursor: pointer; transition: all 0.2s; opacity: 0.6;
+        }
+        .escape-portal:hover { background: #3d3119; opacity: 1; }
+        
+        .portal-tl { left: -76px; top: 16px; }
+        .portal-tr { right: -76px; top: 16px; }
+        .portal-bl { left: -76px; bottom: 16px; }
+        .portal-br { right: -76px; bottom: 16px; }
+
+        /* 6. 幽靈棋子 - 改為扁平化棋子風格 */
         .ghost {
-            width: 46px; height: 50px; background: linear-gradient(to bottom, #f8fafc, #cbd5e1);
-            border-radius: 25px 25px 5px 5px; position: relative; display: flex; justify-content: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
-            animation: floatAnimation 3s ease-in-out infinite;
+            width: 50px; height: 60px; 
+            background: #ffffff; /* 藍方為白棋 */
+            border-radius: 25px 25px 5px 5px; position: relative; 
+            display: flex; justify-content: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+            z-index: 10;
         }
-        @keyframes floatAnimation {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-4px); }
-            100% { transform: translateY(0px); }
-        }
+        
+        /* 區分敵我：紅方使用深灰/黑色棋子 */
+        .player-red .ghost { background: #2c2c2c; }
 
+        /* 眼睛設計 */
         .ghost::before, .ghost::after {
-            content: ''; position: absolute; top: 16px; width: 6px; height: 8px; background: #1e293b; border-radius: 50%;
+            content: ''; position: absolute; top: 20px; width: 6px; height: 6px; 
+            border-radius: 50%;
         }
-        .ghost::before { left: 13px; } .ghost::after { right: 13px; }
-        .player-red .ghost { border-bottom: 4px solid #ef4444; }
-        .player-blue .ghost { border-bottom: 4px solid #3b82f6; }
+        .player-blue .ghost::before, .player-blue .ghost::after { background: #161512; }
+        .player-red .ghost::before, .player-red .ghost::after { background: #d64f4f; } /* 紅方紅眼 */
+        
+        .ghost::before { left: 14px; } 
+        .ghost::after { right: 14px; }
 
-        .dot { width: 14px; height: 14px; border-radius: 50%; position: absolute; top: -4px; right: -4px; border: 2px solid #fff; z-index: 10;}
-        .good-dot { background-color: #3b82f6; box-shadow: 0 0 10px #3b82f6; }
-        .bad-dot { background-color: #ef4444; box-shadow: 0 0 10px #ef4444; }
+        /* 標示好/壞鬼的點點 - 改放在胸前像徽章 */
+        .dot { 
+            width: 12px; height: 12px; border-radius: 50%; 
+            position: absolute; bottom: 12px; 
+            border: 2px solid rgba(255,255,255,0.8); 
+        }
+        .player-red .dot { border-color: rgba(0,0,0,0.5); }
+        
+        .good-dot { background-color: #81b64c; } /* 好鬼用綠色 */
+        .bad-dot { background-color: #d64f4f; }  /* 壞鬼用紅色 */
         .unknown-dot { display: none; }
     </style>
 </head>
@@ -109,27 +203,27 @@
 
 <div class="game-container">
     <div class="sidebar">
-        <div>
-            <h2>Geister 殘局解謎</h2>
-            <p class="tagline">題目將自動從資料庫載入。若你走對了，AI 會自動回應；最後一步請從角落脫逃！</p>
+        <div class="header-section">
+            <h2>Geister Tactics</h2>
+            <p class="tagline">Endgame Puzzle Trainer</p>
         </div>
         
         <div class="control-group">
-            <label>選擇題庫關卡</label>
+            <label>Select Puzzle</label>
             <select id="puzzleSelect"></select>
-            <button class="action-btn" onclick="loadSelectedPuzzle()">▶️ 載入此殘局</button>
+            <button class="action-btn" onclick="loadSelectedPuzzle()">Load Puzzle</button>
         </div>
 
         <div class="status-box">
-            <div id="puzzleTitle">系統連線中...</div>
-            <div id="statusMessage">正在嘗試與題庫連線。</div>
+            <div id="puzzleTitle">Connecting...</div>
+            <div id="statusMessage">Attempting to reach puzzle database.</div>
         </div>
 
-        <button class="action-btn" style="background:#475569;" onclick="showSolution()">💡 查看標準解答</button>
+        <button class="secondary-btn" onclick="showSolution()">Show Solution</button>
         <div id="solutionBox"></div>
 
         <div class="rating-box" id="ratingBox">
-            <h4>這道謎題設計得好嗎？</h4>
+            <h4>Rate this puzzle</h4>
             <div class="stars">
                 <span class="star" data-value="1" onclick="submitRating(1)">★</span>
                 <span class="star" data-value="2" onclick="submitRating(2)">★</span>
@@ -137,15 +231,15 @@
                 <span class="star" data-value="4" onclick="submitRating(4)">★</span>
                 <span class="star" data-value="5" onclick="submitRating(5)">★</span>
             </div>
-            <p id="ratingThanks" style="display:none; font-size:12px; color:#a3e635; margin-top:10px;">感謝評分！數據已回傳後台。</p>
+            <p id="ratingThanks" style="display:none; font-size:12px; color:#81b64c; margin-top:10px;">Rating submitted.</p>
         </div>
     </div>
 
     <div class="board-wrapper">
-        <div class="escape-portal portal-tl" onclick="handleCellClick(0, -1, this)">🏃 脫逃</div>
-        <div class="escape-portal portal-tr" onclick="handleCellClick(0, 6, this)">🏃 脫逃</div>
-        <div class="escape-portal portal-bl" onclick="handleCellClick(5, -1, this)">🏃 脫逃</div>
-        <div class="escape-portal portal-br" onclick="handleCellClick(5, 6, this)">🏃 脫逃</div>
+        <div class="escape-portal portal-tl" onclick="handleCellClick(0, -1, this)">EXIT</div>
+        <div class="escape-portal portal-tr" onclick="handleCellClick(0, 6, this)">EXIT</div>
+        <div class="escape-portal portal-bl" onclick="handleCellClick(5, -1, this)">EXIT</div>
+        <div class="escape-portal portal-br" onclick="handleCellClick(5, 6, this)">EXIT</div>
 
         <div class="board" id="chessBoard"></div>
     </div>
@@ -155,43 +249,36 @@
     let selectedCell = null;
     let currentPuzzleId = null;
 
-    // === 1. 網頁啟動時，向後端要所有題庫 ===
     async function initPuzzles() {
         try {
             const response = await fetch("/api/chess/puzzles");
             const data = await response.json();
-            
             const selectBox = document.getElementById("puzzleSelect");
             selectBox.innerHTML = ""; 
 
             if (!data.puzzles || data.puzzles.length === 0) {
-                selectBox.innerHTML = `<option value="">尚無題庫，等待 C++ 傳送...</option>`;
-                document.getElementById("puzzleTitle").innerText = "題庫為空";
-                document.getElementById("statusMessage").innerText = "請先透過 API 上傳謎題。";
+                selectBox.innerHTML = `<option value="">No puzzles found...</option>`;
+                document.getElementById("puzzleTitle").innerText = "Empty Database";
+                document.getElementById("statusMessage").innerText = "Please upload puzzles via API.";
                 return;
             }
 
-            // 把資料庫的題目塞進下拉選單
             data.puzzles.forEach(p => {
                 const opt = document.createElement("option");
                 opt.value = p.id;
                 opt.innerText = p.title;
                 selectBox.appendChild(opt);
             });
-
-            // 預設自動載入第一關
             loadSelectedPuzzle();
         } catch (error) {
-            console.error("題庫連線失敗:", error);
-            document.getElementById("puzzleTitle").innerText = "連線失敗";
-            document.getElementById("statusMessage").innerText = "無法連接到資料庫。";
+            document.getElementById("puzzleTitle").innerText = "Connection Failed";
+            document.getElementById("statusMessage").innerText = "Unable to connect to database.";
         }
     }
 
-    // === 2. 載入選擇的關卡 ===
     async function loadSelectedPuzzle() {
         const selectBox = document.getElementById("puzzleSelect");
-        if (!selectBox.value) return; // 如果沒題目就跳出
+        if (!selectBox.value) return; 
 
         currentPuzzleId = selectBox.value;
         document.getElementById("solutionBox").style.display = "none";
@@ -203,7 +290,6 @@
         fetchBoard();
     }
 
-    // === 3. 獲取並渲染棋盤 ===
     async function fetchBoard() {
         const response = await fetch(`/api/chess/board?player=blue`);
         const data = await response.json();
@@ -212,15 +298,14 @@
         const statusMsg = document.getElementById("statusMessage");
         statusMsg.innerText = data.message;
         
-        // 通關或失敗時，顯示評分星星
         if (data.status === "solved") {
-            statusMsg.style.color = "#a3e635";
+            statusMsg.style.color = "#81b64c";
             document.getElementById("ratingBox").style.display = "block";
         } else if (data.status === "failed") {
-            statusMsg.style.color = "#ef4444";
+            statusMsg.style.color = "#d64f4f";
             document.getElementById("ratingBox").style.display = "block";
         } else {
-            statusMsg.style.color = "#cbd5e1";
+            statusMsg.style.color = "#bababa";
         }
         
         const boardContainer = document.getElementById("chessBoard");
@@ -254,7 +339,6 @@
             }
         }
 
-        // 敵方自動走棋邏輯
         if (data.status === 'playing' && data.turn === 'red') {
             setTimeout(async () => {
                 await fetch("/api/chess/auto_move", { method: "POST" });
@@ -263,7 +347,6 @@
         }
     }
 
-    // === 4. 點擊走棋 ===
     async function handleCellClick(row, col, cellElement) {
         if (selectedCell === null) {
             selectedCell = { row, col };
@@ -288,8 +371,8 @@
 
             if (!response.ok) {
                 const errResult = await response.json();
-                document.getElementById("statusMessage").innerText = "⚠️ " + errResult.message;
-                document.getElementById("statusMessage").style.color = "#ef4444";
+                document.getElementById("statusMessage").innerText = "⚠ " + errResult.message;
+                document.getElementById("statusMessage").style.color = "#d64f4f";
                 return;
             }
             
@@ -297,7 +380,6 @@
         }
     }
 
-    // === 5. 顯示解答 ===
     async function showSolution() {
         if (!currentPuzzleId) return;
         const response = await fetch(`/api/chess/solution/${currentPuzzleId}`);
@@ -305,13 +387,12 @@
         const solBox = document.getElementById("solutionBox");
         solBox.style.display = "block";
         if (data.solution === "no solution") {
-            solBox.innerHTML = "<strong>殘局分析：</strong><br><span style='color:#ef4444; font-weight:bold;'>此題在數學模型中證實無解。</span>";
+            solBox.innerHTML = "<strong>Evaluation:</strong><br><span style='color:#d64f4f;'>Objective is unreachable.</span>";
         } else {
-            solBox.innerHTML = "<strong>AI 推薦最優解法：</strong><br>" + data.solution.split("   ").join("<br>");
+            solBox.innerHTML = "<strong>Best Engine Move:</strong><br>" + data.solution.split("   ").join("<br>");
         }
     }
 
-    // === 6. 評分相關機制 ===
     function resetStars() {
         document.querySelectorAll('.star').forEach(s => s.classList.remove('active'));
     }
@@ -322,19 +403,15 @@
             if (idx < score) s.classList.add('active');
             else s.classList.remove('active');
         });
-
         await fetch("/api/chess/rate", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ puzzle_id: currentPuzzleId.toString(), rating: score })
         });
-
         document.getElementById("ratingThanks").style.display = "block";
     }
 
-    // === 啟動點：抓取資料庫題庫 ===
     initPuzzles();
 </script>
-
 </body>
 </html>
