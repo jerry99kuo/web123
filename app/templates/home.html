@@ -6,7 +6,8 @@
     <title>郭兆軒 | Developer Portfolio</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9211706288846351"
+     crossorigin="anonymous"></script>
     <style>
         /* --- 核心變數設計 (Vercel/Linear 暗黑風格) --- */
         :root {
@@ -144,7 +145,7 @@
             gap: 12px;
         }
         
-        .section-title::after {
+        .section-title::before{
             content: '';
             height: 1px;
             flex-grow: 1;
@@ -220,7 +221,7 @@
                 <img src="static/images/me.jpg" alt="Jerry Kuo" class="avatar" onerror="this.src='https://via.placeholder.com/80'">
                 <div>
                     <h1>郭兆軒</h1>
-                    <div class="role">大二生</div>
+                    <div class="role">普通人</div>
                 </div>
             </div>
             
@@ -265,22 +266,6 @@
                         <p>順利完賽 21KM 賽事，持續朝向 Zone 2 跑步訓練目標邁進，突破配速極限。</p>
                         <div class="card-meta">
                             <span>Lifestyle & Health</span>
-                        </div>
-                    </a>
-                    
-                    <a href="/portfolio" class="card">
-                        <h3><i class="bi bi-star-fill" style="color: #fbbf24; font-size: 1.1rem;"></i> 西洋棋 Lichess 戰績突破</h3>
-                        <p>Puzzle Rating 成功達到 1600 分，持續備戰線下比賽，朝 2100-2400 目標挺進。</p>
-                        <div class="card-meta">
-                            <span>Chess Records</span>
-                        </div>
-                    </a>
-
-                    <a href="/portfolio" class="card">
-                        <h3><i class="bi bi-star-fill" style="color: #fbbf24; font-size: 1.1rem;"></i> JobHub 系統開發</h3>
-                        <p>基於 n8n 打造的自動化職缺整合系統，結合 AI 應用實現高效的資訊處理。</p>
-                        <div class="card-meta">
-                            <span>#n8n #Automation</span>
                         </div>
                     </a>
                 {% endif %}
